@@ -255,6 +255,10 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
               <input type="text" id="inp-serie" placeholder="Ex: COL-001">
             </div>
           </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>Ocorrência / Observação <span style="color:#aaa;font-weight:400">(opcional)</span></label>
+            <input type="text" id="inp-ocorrencia" placeholder="Ex: aparelho avariado, tela trincada...">
+          </div>
         </div>
 
         <!-- BUSCA TERCEIRO -->
@@ -365,6 +369,14 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
               <option value="">Todos</option>
               <option value="interno">Interno</option>
               <option value="terceiro">Terceiro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="hist-status">
+              <option value="">Todos</option>
+              <option value="PENDENTE">Pendente</option>
+              <option value="DEVOLVIDO">Devolvido</option>
             </select>
           </div>
           <div style="display:flex;align-items:flex-end;gap:8px;">
@@ -942,18 +954,47 @@ function desativarTerceiro(id) {
 
 // ─── HISTÓRICO ───────────────────────────────────────────────────────────────
 async function buscarHistorico() {
-  const data  = document.getElementById('hist-data').value;
-  const turno = document.getElementById('hist-turno').value;
-  const tipo  = document.getElementById('hist-tipo').value;
+  const filtData  = document.getElementById('hist-data').value;
+  const filtTurno = document.getElementById('hist-turno').value;
+  const filtTipo  = document.getElementById('hist-tipo').value;
+  const filtStatus= document.getElementById('hist-status') ? document.getElementById('hist-status').value : '';
   const tbody = document.getElementById('tbody-historico');
-  if (!data) { alert('Selecione uma data.'); return; }
+  if (!filtData) { alert('Selecione uma data.'); return; }
   tbody.innerHTML = '<tr><td colspan="12" class="empty">Carregando...</td></tr>';
+
+  // 1. Ler do localStorage primeiro (sempre disponível)
+  const dataFmt = filtData.split('-').reverse().join('/');
+  let lista = registros.filter(r => {
+    if (r.data !== dataFmt) return false;
+    if (filtTurno && r.turno !== filtTurno) return false;
+    if (filtTipo  && r.tipo  !== filtTipo)  return false;
+    if (filtStatus === 'DEVOLVIDO' && !devolvido(r)) return false;
+    if (filtStatus === 'PENDENTE'  &&  devolvido(r)) return false;
+    return true;
+  });
+
+  if (lista.length > 0) {
+    dadosHistorico = lista;
+    renderHistorico(lista);
+  }
+
+  // 2. Tentar Sheets em background para dados de outros dias
   try {
-    const json = await jsonp({acao:'historico', data:data.split('-').reverse().join('/'), turno, tipo});
-    if (!json) throw new Error('sem resposta');
-    dadosHistorico = json.registros || [];
-    renderHistorico(dadosHistorico);
-  } catch { tbody.innerHTML = '<tr><td colspan="12" class="empty">Erro ao buscar</td></tr>'; }
+    const json = await Promise.race([
+      jsonp({acao:'historico', data:dataFmt, turno:filtTurno, tipo:filtTipo}),
+      new Promise((_,r) => setTimeout(() => r(new Error('timeout')), 8000))
+    ]);
+    if (json && json.registros && json.registros.length > 0) {
+      dadosHistorico = json.registros;
+      renderHistorico(json.registros);
+    } else if (lista.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro encontrado.</td></tr>';
+    }
+  } catch(e) {
+    if (lista.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="12" class="empty">Sem conexão com Sheets. Exibindo dados locais.</td></tr>';
+    }
+  }
 }
 
 function renderHistorico(lista) {
@@ -1081,6 +1122,7 @@ function toast(msg, cor='#1a3a5c') {
   clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none',2500);
 }
 
+// ── API: JSONP para leitura + no-cors para escrita ──────────────────────────
 function jsonp(body) {
   return new Promise((resolve, reject) => {
     const url = localStorage.getItem('coletores_script_url');
@@ -1090,9 +1132,7 @@ function jsonp(body) {
     const sep = url.includes('?') ? '&' : '?';
     const src = url + sep + 'acao=' + (body.acao||'') + '&payload=' + payload + '&callback=' + cbName + '&t=' + Date.now();
     const script = document.createElement('script');
-    const timer = setTimeout(() => {
-      cleanup(); reject(new Error('Timeout'));
-    }, 15000);
+    const timer = setTimeout(() => { cleanup(); reject(new Error('Timeout')); }, 15000);
     function cleanup() {
       clearTimeout(timer);
       delete window[cbName];
@@ -1105,9 +1145,35 @@ function jsonp(body) {
   });
 }
 
+// Escrita: no-cors (fire-and-forget, não lê resposta mas não bloqueia)
+function postNoCorsFire(body) {
+  const url = localStorage.getItem('coletores_script_url');
+  if (!url) return;
+  const payload = encodeURIComponent(JSON.stringify(body));
+  const sep = url.includes('?') ? '&' : '?';
+  const src = url + sep + 'acao=' + (body.acao||'') + '&payload=' + payload + '&t=' + Date.now();
+  // Usa imagem 1x1 — não sofre CORS e dispara GET no servidor
+  const img = new Image();
+  img.src = src;
+  // Fallback: script tag sem callback
+  const script = document.createElement('script');
+  script.src = src + '&callback=_noop';
+  window._noop = window._noop || function(){};
+  document.head.appendChild(script);
+  setTimeout(() => { if (script.parentNode) script.parentNode.removeChild(script); }, 5000);
+}
+
 async function post(body) {
+  // Ações de escrita: dispara no-cors E tenta jsonp
+  const escrita = ['registrarRetirada','registrarDevolucao','salvarUsuario',
+                   'excluirUsuario','salvarTerceiro','excluirTerceiro'];
+  if (escrita.includes(body.acao)) {
+    postNoCorsFire(body); // fire-and-forget para Sheets
+    return { ok: true };  // localStorage já salvou, retorna ok imediatamente
+  }
+  // Ações de leitura: tenta jsonp
   try { return await jsonp(body); }
-  catch(e) { console.warn('Sheets offline:', e); return null; }
+  catch(e) { console.warn('Sheets leitura falhou:', e); return null; }
 }
 
 function limparForm() {
