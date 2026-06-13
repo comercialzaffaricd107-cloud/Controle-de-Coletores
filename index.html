@@ -532,7 +532,9 @@ async function fazerLogin() {
   if (!url) { erro.textContent = 'URL não configurada. Contate o supervisor.'; return; }
   erro.textContent = 'Verificando...';
   try {
-    const res  = await fetch(url, { method:'POST', body:JSON.stringify({acao:'login',usuario,senha}), headers:{'Content-Type':'text/plain'} });
+    const payload = encodeURIComponent(JSON.stringify({acao:'login',usuario,senha}));
+    const sep = url.includes('?') ? '&' : '?';
+    const res  = await fetch(url + sep + 'acao=login&payload=' + payload + '&t=' + Date.now(), { method: 'GET' });
     const data = await res.json();
     if (data.ok) {
       sessao = { nome:data.nome, perfil:data.perfil, id:data.id, ts:Date.now() };
@@ -895,8 +897,8 @@ async function buscarHistorico() {
   if (!data) { alert('Selecione uma data.'); return; }
   tbody.innerHTML = '<tr><td colspan="11" class="empty">Carregando...</td></tr>';
   try {
-    const params = new URLSearchParams({acao:'historico', data:data.split('-').reverse().join('/'), turno, tipo});
-    const res    = await fetch(url + '?' + params);
+    const params = new URLSearchParams({acao:'historico', data:data.split('-').reverse().join('/'), turno, tipo, t:Date.now()});
+    const res    = await fetch(url + '?' + params, { method: 'GET' });
     const json   = await res.json();
     dadosHistorico = json.registros || [];
     renderHistorico(dadosHistorico);
@@ -945,7 +947,7 @@ async function carregarUsuarios() {
   tbody.innerHTML = '<tr><td colspan="5" class="empty">Carregando...</td></tr>';
   try {
     const url  = localStorage.getItem('coletores_script_url');
-    const res  = await fetch(url + '?acao=listarUsuarios');
+    const res  = await fetch(url + '?acao=listarUsuarios&t=' + Date.now(), { method: 'GET' });
     const data = await res.json();
     if (!data.usuarios?.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">Nenhum usuário</td></tr>'; return; }
     tbody.innerHTML = data.usuarios.map(u =>
@@ -1015,7 +1017,7 @@ async function testarUrl() {
   if (!url) { st.innerHTML = '<span style="color:#dc3545">Informe a URL</span>'; return; }
   st.textContent = 'Testando...';
   try {
-    const res  = await fetch(url+'?acao=ping');
+    const res  = await fetch(url + '?acao=ping&t=' + Date.now(), { method: 'GET' });
     const data = await res.json();
     st.innerHTML = data.ok ? '<span style="color:#28a745">✅ Conexão OK!</span>' : '<span style="color:#dc3545">❌ Resposta inesperada</span>';
   } catch { st.innerHTML = '<span style="color:#dc3545">❌ Falha na conexão</span>'; }
@@ -1034,9 +1036,14 @@ async function post(body) {
   const url = localStorage.getItem('coletores_script_url');
   if (!url) return null;
   try {
-    const res = await fetch(url,{method:'POST',body:JSON.stringify(body),headers:{'Content-Type':'text/plain'}});
+    // Usa GET com jsonPayload para evitar CORS preflight
+    const payload = encodeURIComponent(JSON.stringify(body));
+    const sep = url.includes('?') ? '&' : '?';
+    const res = await fetch(url + sep + 'acao=' + (body.acao||'') + '&payload=' + payload + '&t=' + Date.now(), {
+      method: 'GET'
+    });
     return await res.json();
-  } catch(e) { console.warn('Sheets offline:',e); return null; }
+  } catch(e) { console.warn('Sheets offline:', e); return null; }
 }
 
 function limparForm() {
