@@ -21,24 +21,14 @@ body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; }
 .login-box p  { color: #888; font-size: 0.82rem; margin-bottom: 28px; }
 .login-box .form-group { text-align: left; margin-bottom: 16px; }
 .login-box label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; display: block; margin-bottom: 5px; }
-.login-box input {
-  width: 100%; border: 1.5px solid #ddd; border-radius: 7px;
-  padding: 10px 14px; font-size: 0.92rem; transition: border 0.2s;
-}
+.login-box input { width: 100%; border: 1.5px solid #ddd; border-radius: 7px; padding: 10px 14px; font-size: 0.92rem; transition: border 0.2s; }
 .login-box input:focus { outline: none; border-color: #2d6a9f; }
 #login-erro { color: #dc3545; font-size: 0.82rem; margin-bottom: 10px; min-height: 18px; }
-.btn-login {
-  width: 100%; background: #1a3a5c; color: white; border: none;
-  border-radius: 7px; padding: 12px; font-size: 0.95rem; font-weight: 700;
-  cursor: pointer; transition: background 0.2s; margin-top: 4px;
-}
+.btn-login { width: 100%; background: #1a3a5c; color: white; border: none; border-radius: 7px; padding: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background 0.2s; margin-top: 4px; }
 .btn-login:hover { background: #2d6a9f; }
 
 #tela-app { display: none; }
-header {
-  background: linear-gradient(135deg, #1a3a5c, #2d6a9f); color: white;
-  padding: 13px 24px; display: flex; align-items: center; justify-content: space-between;
-}
+header { background: linear-gradient(135deg, #1a3a5c, #2d6a9f); color: white; padding: 13px 24px; display: flex; align-items: center; justify-content: space-between; }
 header h1 { font-size: 1.15rem; font-weight: 700; }
 .header-right { display: flex; align-items: center; gap: 16px; font-size: 0.82rem; }
 .user-badge { background: rgba(255,255,255,0.15); border-radius: 20px; padding: 4px 12px; font-size: 0.8rem; }
@@ -47,11 +37,7 @@ header h1 { font-size: 1.15rem; font-weight: 700; }
 
 .container { max-width: 1150px; margin: 0 auto; padding: 20px; }
 
-#upload-banner {
-  background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px;
-  padding: 12px 18px; margin-bottom: 18px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
-}
+#upload-banner { background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 12px 18px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .btn-upload-label { background: #ffc107; color: #333; border: none; border-radius: 6px; padding: 7px 16px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
 #file-status { font-size: 0.8rem; color: #555; margin-top: 4px; }
 
@@ -65,17 +51,19 @@ header h1 { font-size: 1.15rem; font-weight: 700; }
 .stat-card { background: white; border-radius: 10px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); text-align: center; }
 .stat-card .num { font-size: 2rem; font-weight: 700; }
 .stat-card .lbl { font-size: 0.78rem; color: #888; margin-top: 2px; }
-.stat-card.azul .num { color: #2d6a9f; }
-.stat-card.verde .num { color: #28a745; }
-.stat-card.laranja .num { color: #e67e22; }
+.stat-card.azul .num   { color: #2d6a9f; }
+.stat-card.verde .num  { color: #28a745; }
+.stat-card.laranja .num{ color: #e67e22; }
 
 .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); margin-bottom: 20px; }
 .card h2 { font-size: 1rem; font-weight: 700; color: #1a3a5c; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e8f0fe; display: flex; justify-content: space-between; align-items: center; }
 
 .form-grid { display: grid; grid-template-columns: 1fr 2fr 1fr 2fr 1fr; gap: 12px; align-items: end; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.form-grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
 .form-group { display: flex; flex-direction: column; gap: 4px; }
 .form-group label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; }
-.form-group input, .form-group select { border: 1.5px solid #ddd; border-radius: 6px; padding: 9px 12px; font-size: 0.9rem; background: white; transition: border 0.2s; }
+.form-group input, .form-group select { border: 1.5px solid #ddd; border-radius: 6px; padding: 9px 12px; font-size: 0.9rem; background: white; transition: border 0.2s; font-family: inherit; }
 .form-group input:focus, .form-group select:focus { outline: none; border-color: #2d6a9f; }
 .form-group input[readonly] { background: #f8f9fa; color: #444; }
 
@@ -84,11 +72,12 @@ header h1 { font-size: 1.15rem; font-weight: 700; }
 .btn-danger  { background: #dc3545; color: white; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
 .btn-success { background: #28a745; color: white; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
 .btn-warn    { background: #e67e22; color: white; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.btn-info    { background: #0d6efd; color: white; border: none; border-radius: 6px; padding: 6px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
 .btn-sm      { padding: 5px 11px; font-size: 0.78rem; }
 
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-thead th { background: #1a3a5c; color: white; padding: 10px 12px; text-align: left; font-size: 0.78rem; text-transform: uppercase; }
+thead th { background: #1a3a5c; color: white; padding: 10px 12px; text-align: left; font-size: 0.78rem; text-transform: uppercase; white-space: nowrap; }
 tbody tr { border-bottom: 1px solid #f0f0f0; }
 tbody tr:hover { background: #f8f9fa; }
 tbody td { padding: 10px 12px; vertical-align: middle; }
@@ -103,6 +92,23 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .badge-operador   { background: #6c757d; color: white; }
 .badge-ativo   { background: #d4edda; color: #155724; }
 .badge-inativo { background: #f8d7da; color: #842029; }
+.badge-terceiro { background: #e8d5f7; color: #5a1f8a; }
+.badge-interno  { background: #cfe2ff; color: #084298; }
+
+/* TIPO COLABORADOR TOGGLE */
+.tipo-toggle { display: flex; gap: 0; margin-bottom: 16px; border-radius: 7px; overflow: hidden; border: 1.5px solid #1a3a5c; width: fit-content; }
+.tipo-toggle button { padding: 8px 20px; border: none; font-size: 0.85rem; font-weight: 600; cursor: pointer; background: white; color: #1a3a5c; transition: all 0.2s; }
+.tipo-toggle button.sel { background: #1a3a5c; color: white; }
+
+/* CPF BUSCA */
+.cpf-busca-box { background: #f0f4ff; border: 1.5px solid #c0d0f0; border-radius: 8px; padding: 14px 16px; margin-bottom: 14px; }
+.cpf-busca-box label { font-size: 0.78rem; font-weight: 600; color: #1a3a5c; text-transform: uppercase; display: block; margin-bottom: 6px; }
+.cpf-busca-row { display: flex; gap: 8px; align-items: center; }
+.cpf-busca-row input { flex: 1; border: 1.5px solid #c0d0f0; border-radius: 6px; padding: 9px 12px; font-size: 0.9rem; }
+#msg-cpf { font-size: 0.8rem; margin-top: 6px; min-height: 16px; }
+.msg-ok  { color: #28a745; }
+.msg-err { color: #dc3545; }
+.msg-info{ color: #0d6efd; }
 
 #pendencias-list { display: flex; flex-direction: column; gap: 10px; }
 .pendencia-item { background: #fff8e1; border-left: 4px solid #e67e22; border-radius: 6px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
@@ -114,13 +120,12 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 
 .empty { text-align: center; padding: 30px; color: #aaa; font-size: 0.9rem; }
 #msg-matricula { font-size: 0.8rem; min-height: 16px; margin-top: 2px; }
-.msg-ok  { color: #28a745; }
-.msg-err { color: #dc3545; }
 
+/* MODAL */
 .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: none; align-items: center; justify-content: center; z-index: 900; }
 .modal-bg.open { display: flex; }
-.modal { background: white; border-radius: 12px; padding: 28px; width: 420px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
-.modal h3 { color: #1a3a5c; margin-bottom: 20px; font-size: 1rem; }
+.modal { background: white; border-radius: 12px; padding: 28px; width: 480px; max-width: 95vw; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+.modal h3 { color: #1a3a5c; margin-bottom: 20px; font-size: 1rem; border-bottom: 2px solid #e8f0fe; padding-bottom: 10px; }
 .modal .form-group { margin-bottom: 14px; }
 .modal-btns { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
 
@@ -128,16 +133,26 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .config-box label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; display: block; margin-bottom: 6px; }
 .config-box input { width: 100%; border: 1.5px solid #ddd; border-radius: 6px; padding: 9px 12px; font-size: 0.88rem; }
 
-#toast { position: fixed; bottom: 24px; right: 24px; background: #1a3a5c; color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.88rem; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; }
+#toast { position: fixed; bottom: 24px; right: 24px; color: white; padding: 12px 20px; border-radius: 8px; font-size: 0.88rem; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; }
+
+/* TERCEIROS */
+.terceiro-card { background: #faf5ff; border: 1.5px solid #d8b4fe; border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; }
+.terceiro-card .info strong { display: block; font-size: 0.9rem; color: #1a3a5c; }
+.terceiro-card .info span { font-size: 0.78rem; color: #666; }
+.search-box { display: flex; gap: 8px; margin-bottom: 16px; }
+.search-box input { flex: 1; border: 1.5px solid #ddd; border-radius: 6px; padding: 9px 12px; font-size: 0.9rem; }
 
 @media (max-width: 700px) {
   .form-grid { grid-template-columns: 1fr 1fr; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr; }
+  .form-grid-4 { grid-template-columns: 1fr 1fr; }
   .stats { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="tela-login">
   <div class="login-box">
     <div style="font-size:2.5rem;margin-bottom:10px;">📟</div>
@@ -156,6 +171,7 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
   </div>
 </div>
 
+<!-- APP -->
 <div id="tela-app">
   <header>
     <h1>📟 Controle de Coletores — CD 107</h1>
@@ -178,63 +194,138 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 
     <div class="tabs" id="abas"></div>
 
+    <!-- ═══════ ABA TURNO ═══════ -->
     <div id="tab-turno" class="tab-content active">
       <div class="stats">
         <div class="stat-card azul"><div class="num" id="stat-total">0</div><div class="lbl">Retiradas hoje</div></div>
         <div class="stat-card verde"><div class="num" id="stat-devolvidos">0</div><div class="lbl">Devolvidos</div></div>
         <div class="stat-card laranja"><div class="num" id="stat-pendentes">0</div><div class="lbl">Pendentes</div></div>
       </div>
+
       <div class="card">
         <h2>➕ Registrar Retirada</h2>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Matrícula</label>
-            <input type="text" id="inp-matricula" placeholder="Ex: 12345" maxlength="10">
-            <div id="msg-matricula"></div>
-          </div>
-          <div class="form-group">
-            <label>Nome Completo</label>
-            <input type="text" id="inp-nome" placeholder="Busca automática ou manual" readonly>
-          </div>
-          <div class="form-group">
-            <label>Turno</label>
-            <select id="inp-turno">
-              <option value="A">Turno A</option>
-              <option value="B">Turno B</option>
-              <option value="C">Turno C</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Aparelho</label>
-            <input type="text" id="inp-aparelho" placeholder="Ex: Honeywell CK65">
-          </div>
-          <div class="form-group">
-            <label>Nº Série</label>
-            <input type="text" id="inp-serie" placeholder="Ex: COL-001">
+
+        <!-- TIPO: interno ou terceiro -->
+        <div class="tipo-toggle">
+          <button id="btn-tipo-interno" class="sel" onclick="setTipo('interno')">🏭 Colaborador Interno</button>
+          <button id="btn-tipo-terceiro" onclick="setTipo('terceiro')">🤝 Terceiro</button>
+        </div>
+
+        <!-- BUSCA INTERNO -->
+        <div id="bloco-interno">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Matrícula</label>
+              <input type="text" id="inp-matricula" placeholder="Ex: 12345" maxlength="10">
+              <div id="msg-matricula"></div>
+            </div>
+            <div class="form-group">
+              <label>Nome Completo</label>
+              <input type="text" id="inp-nome" placeholder="Busca automática ou manual" readonly>
+            </div>
+            <div class="form-group">
+              <label>Turno</label>
+              <select id="inp-turno">
+                <option value="A">Turno A</option>
+                <option value="B">Turno B</option>
+                <option value="C">Turno C</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Aparelho</label>
+              <input type="text" id="inp-aparelho" placeholder="Ex: Honeywell CK65">
+            </div>
+            <div class="form-group">
+              <label>Nº Série</label>
+              <input type="text" id="inp-serie" placeholder="Ex: COL-001">
+            </div>
           </div>
         </div>
+
+        <!-- BUSCA TERCEIRO -->
+        <div id="bloco-terceiro" style="display:none">
+          <div class="cpf-busca-box">
+            <label>🔍 Buscar Terceiro por CPF</label>
+            <div class="cpf-busca-row">
+              <input type="text" id="inp-cpf-busca" placeholder="000.000.000-00" maxlength="14" oninput="formatarCPF(this);buscarTerceiro()">
+              <button class="btn-info btn-sm" onclick="abrirModalTerceiro(null, true)">+ Cadastrar Novo</button>
+            </div>
+            <div id="msg-cpf"></div>
+          </div>
+          <div class="form-grid-4">
+            <div class="form-group" style="grid-column:span 2">
+              <label>Nome do Terceiro</label>
+              <input type="text" id="inp-nome-terc" placeholder="Preenchido automaticamente" readonly>
+            </div>
+            <div class="form-group">
+              <label>Empresa</label>
+              <input type="text" id="inp-empresa-terc" placeholder="Preenchido automaticamente" readonly>
+            </div>
+            <div class="form-group">
+              <label>Turno</label>
+              <select id="inp-turno-terc">
+                <option value="A">Turno A</option>
+                <option value="B">Turno B</option>
+                <option value="C">Turno C</option>
+              </select>
+            </div>
+            <div class="form-group" style="grid-column:span 2">
+              <label>Aparelho</label>
+              <input type="text" id="inp-aparelho-terc" placeholder="Ex: Honeywell CK65">
+            </div>
+            <div class="form-group" style="grid-column:span 2">
+              <label>Nº Série</label>
+              <input type="text" id="inp-serie-terc" placeholder="Ex: COL-001">
+            </div>
+          </div>
+        </div>
+
         <div style="margin-top:14px;">
           <button class="btn-primary" onclick="registrarRetirada()">Registrar Retirada</button>
         </div>
       </div>
+
       <div class="card">
         <h2>📋 Registros do Turno</h2>
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>Matrícula</th><th>Nome</th><th>Turno</th><th>Aparelho</th>
-              <th>Nº Série</th><th>Retirada</th><th>Devolução</th><th>Status</th><th>Ação</th>
+              <th>Tipo</th><th>Matrícula / CPF</th><th>Nome</th><th>Empresa</th>
+              <th>Turno</th><th>Aparelho</th><th>Nº Série</th>
+              <th>Retirada</th><th>Devolução</th><th>Status</th><th>Ação</th>
             </tr></thead>
-            <tbody id="tbody-registros"><tr><td colspan="9" class="empty">Nenhum registro ainda</td></tr></tbody>
+            <tbody id="tbody-registros"><tr><td colspan="11" class="empty">Nenhum registro ainda</td></tr></tbody>
           </table>
         </div>
       </div>
+
       <div class="card">
         <h2>⚠️ Pendências de Final de Turno</h2>
         <div id="pendencias-list"><div class="empty">Nenhuma pendência ✅</div></div>
       </div>
     </div>
 
+    <!-- ═══════ ABA TERCEIROS ═══════ -->
+    <div id="tab-terceiros" class="tab-content">
+      <div class="card">
+        <h2>🤝 Cadastro de Terceiros
+          <button class="btn-primary btn-sm" onclick="abrirModalTerceiro(null, false)">+ Novo Terceiro</button>
+        </h2>
+        <div class="search-box">
+          <input type="text" id="busca-terceiro" placeholder="Buscar por nome, CPF ou empresa..." oninput="filtrarTerceiros()">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Nome Completo</th><th>CPF</th><th>Empresa</th><th>Cadastrado em</th><th>Status</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbody-terceiros"><tr><td colspan="6" class="empty">Nenhum terceiro cadastrado</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ ABA HISTÓRICO ═══════ -->
     <div id="tab-historico" class="tab-content">
       <div class="card">
         <h2>🗂️ Consulta de Histórico</h2>
@@ -249,22 +340,33 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
               <option value="C">Turno C</option>
             </select>
           </div>
-          <div style="display:flex;align-items:flex-end;">
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="hist-tipo">
+              <option value="">Todos</option>
+              <option value="interno">Interno</option>
+              <option value="terceiro">Terceiro</option>
+            </select>
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:8px;">
             <button class="btn-primary" onclick="buscarHistorico()">Buscar</button>
+            <button class="btn-success" onclick="exportarExcel()">⬇ Excel</button>
           </div>
         </div>
         <div class="table-wrap">
           <table>
             <thead><tr>
-              <th>Data</th><th>Turno</th><th>Matrícula</th><th>Nome</th>
-              <th>Aparelho</th><th>Nº Série</th><th>Retirada</th><th>Devolução</th><th>Status</th>
+              <th>Data</th><th>Tipo</th><th>Turno</th><th>Matrícula / CPF</th>
+              <th>Nome</th><th>Empresa</th><th>Aparelho</th><th>Nº Série</th>
+              <th>Retirada</th><th>Devolução</th><th>Status</th>
             </tr></thead>
-            <tbody id="tbody-historico"><tr><td colspan="9" class="empty">Use os filtros acima</td></tr></tbody>
+            <tbody id="tbody-historico"><tr><td colspan="11" class="empty">Use os filtros acima</td></tr></tbody>
           </table>
         </div>
       </div>
     </div>
 
+    <!-- ═══════ ABA USUÁRIOS ═══════ -->
     <div id="tab-usuarios" class="tab-content">
       <div class="card">
         <h2>👥 Usuários do Sistema
@@ -279,6 +381,7 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
       </div>
     </div>
 
+    <!-- ═══════ ABA CONFIG ═══════ -->
     <div id="tab-config" class="tab-content">
       <div class="card">
         <h2>⚙️ Configuração</h2>
@@ -293,11 +396,11 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
         </div>
         <div style="padding:14px;background:#e8f4fd;border-radius:8px;font-size:0.85rem;line-height:1.8;color:#1a3a5c;">
           <strong>📌 Instruções:</strong><br>
-          1. Abra <strong>Histórico Coletores - CD 107</strong> no Google Drive<br>
-          2. Clique em <strong>Extensões → Apps Script</strong><br>
-          3. Cole o código Apps Script e salve<br>
-          4. <strong>Implantar → Nova implantação → Web App</strong><br>
-          5. Acesso: <em>Qualquer pessoa</em> — copie a URL e cole acima<br>
+          1. Acesse <strong>script.google.com</strong> → Novo projeto<br>
+          2. Cole o código Apps Script e salve<br>
+          3. <strong>Implantar → Nova implantação → Web App</strong><br>
+          4. Executar como: <em>Eu mesmo</em> · Acesso: <em>Qualquer pessoa</em><br>
+          5. Copie a URL gerada e cole acima<br>
           6. Usuário padrão: <strong>admin / admin123</strong>
         </div>
       </div>
@@ -305,6 +408,36 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
   </div>
 </div>
 
+<!-- MODAL TERCEIRO -->
+<div class="modal-bg" id="modal-bg-terceiro">
+  <div class="modal">
+    <h3 id="modal-terc-titulo">Cadastrar Terceiro</h3>
+    <input type="hidden" id="modal-terc-id">
+    <div class="form-group">
+      <label>Nome Completo *</label>
+      <input type="text" id="modal-terc-nome" placeholder="Nome completo do terceiro">
+    </div>
+    <div class="form-group">
+      <label>CPF *</label>
+      <input type="text" id="modal-terc-cpf" placeholder="000.000.000-00" maxlength="14" oninput="formatarCPF(this)">
+    </div>
+    <div class="form-group">
+      <label>Empresa *</label>
+      <input type="text" id="modal-terc-empresa" placeholder="Nome da empresa prestadora">
+    </div>
+    <div class="form-group">
+      <label>Telefone</label>
+      <input type="text" id="modal-terc-fone" placeholder="(51) 99999-9999" maxlength="15" oninput="formatarFone(this)">
+    </div>
+    <div id="modal-terc-erro" style="color:#dc3545;font-size:0.82rem;min-height:16px;margin-top:4px;"></div>
+    <div class="modal-btns">
+      <button class="btn-primary" style="background:#6c757d;" onclick="fecharModalTerceiro()">Cancelar</button>
+      <button class="btn-primary" onclick="salvarTerceiro()">Salvar Terceiro</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL USUÁRIO -->
 <div class="modal-bg" id="modal-bg-usuario">
   <div class="modal">
     <h3 id="modal-titulo">Novo Usuário</h3>
@@ -334,20 +467,27 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 <div id="toast"></div>
 
 <script>
+// ─── ESTADO GLOBAL ──────────────────────────────────────────────────────────
 let colaboradores = {};
+let terceiros     = JSON.parse(localStorage.getItem('coletores_terceiros') || '[]');
 let registros     = JSON.parse(localStorage.getItem('coletores_registros') || '[]');
 let sessao        = JSON.parse(localStorage.getItem('coletores_sessao')    || 'null');
+let tipoAtual     = 'interno';
+let terceiroBuscado = null;
+let voltarParaRetirada = false;
+let dadosHistorico = [];
 const SESSAO_MS   = 10 * 60 * 60 * 1000;
 
+// ─── INIT ────────────────────────────────────────────────────────────────────
 window.onload = () => {
-  const urlSalva = localStorage.getItem('coletores_script_url') || '';
-  document.getElementById('inp-script-url').value = urlSalva;
+  document.getElementById('inp-script-url').value = localStorage.getItem('coletores_script_url') || '';
   document.getElementById('hist-data').value = new Date().toISOString().split('T')[0];
   verificarSessao();
   setInterval(atualizarRelogio, 1000);
   atualizarRelogio();
-  document.getElementById('login-senha').addEventListener('keydown', e => { if (e.key === 'Enter') fazerLogin(); });
-  document.getElementById('modal-bg-usuario').addEventListener('click', e => { if (e.target === document.getElementById('modal-bg-usuario')) fecharModal(); });
+  document.getElementById('login-senha').addEventListener('keydown', e => { if (e.key==='Enter') fazerLogin(); });
+  document.getElementById('modal-bg-usuario').addEventListener('click', e => { if (e.target===document.getElementById('modal-bg-usuario')) fecharModal(); });
+  document.getElementById('modal-bg-terceiro').addEventListener('click', e => { if (e.target===document.getElementById('modal-bg-terceiro')) fecharModalTerceiro(); });
 };
 
 function atualizarRelogio() {
@@ -355,12 +495,11 @@ function atualizarRelogio() {
     new Date().toLocaleDateString('pt-BR') + ' ' + new Date().toLocaleTimeString('pt-BR');
 }
 
+// ─── SESSÃO / LOGIN ──────────────────────────────────────────────────────────
 function verificarSessao() {
-  if (sessao && Date.now() - sessao.ts < SESSAO_MS) {
-    entrarApp();
-  } else {
-    localStorage.removeItem('coletores_sessao');
-    sessao = null;
+  if (sessao && Date.now() - sessao.ts < SESSAO_MS) { entrarApp(); }
+  else {
+    localStorage.removeItem('coletores_sessao'); sessao = null;
     document.getElementById('tela-login').style.display = 'flex';
     document.getElementById('tela-app').style.display   = 'none';
   }
@@ -376,10 +515,10 @@ async function fazerLogin() {
   if (!url) { erro.textContent = 'URL não configurada. Contate o supervisor.'; return; }
   erro.textContent = 'Verificando...';
   try {
-    const res  = await fetch(url, { method: 'POST', body: JSON.stringify({ acao: 'login', usuario, senha }), headers: { 'Content-Type': 'text/plain' } });
+    const res  = await fetch(url, { method:'POST', body:JSON.stringify({acao:'login',usuario,senha}), headers:{'Content-Type':'text/plain'} });
     const data = await res.json();
     if (data.ok) {
-      sessao = { nome: data.nome, perfil: data.perfil, id: data.id, ts: Date.now() };
+      sessao = { nome:data.nome, perfil:data.perfil, id:data.id, ts:Date.now() };
       localStorage.setItem('coletores_sessao', JSON.stringify(sessao));
       entrarApp();
     } else { erro.textContent = data.erro || 'Usuário ou senha inválidos.'; }
@@ -390,14 +529,12 @@ function entrarApp() {
   document.getElementById('tela-login').style.display = 'none';
   document.getElementById('tela-app').style.display   = 'block';
   document.getElementById('badge-usuario').textContent = sessao.nome + ' · ' + sessao.perfil;
-  montarAbas();
-  renderizar();
+  montarAbas(); renderizar(); renderTerceiros();
   if (sessao.perfil === 'Supervisor') carregarUsuarios();
 }
 
 function sair() {
-  localStorage.removeItem('coletores_sessao');
-  sessao = null;
+  localStorage.removeItem('coletores_sessao'); sessao = null;
   document.getElementById('tela-login').style.display = 'flex';
   document.getElementById('tela-app').style.display   = 'none';
   document.getElementById('login-usuario').value = '';
@@ -405,12 +542,14 @@ function sair() {
   document.getElementById('login-erro').textContent = '';
 }
 
+// ─── ABAS ────────────────────────────────────────────────────────────────────
 function montarAbas() {
   const abas = [
-    { id: 'turno',     label: '📋 Turno Atual',  perfis: ['Operador','Supervisor'] },
-    { id: 'historico', label: '🗂️ Histórico',    perfis: ['Supervisor'] },
-    { id: 'usuarios',  label: '👥 Usuários',      perfis: ['Supervisor'] },
-    { id: 'config',    label: '⚙️ Configuração', perfis: ['Supervisor'] },
+    { id:'turno',     label:'📋 Turno Atual',   perfis:['Operador','Supervisor'] },
+    { id:'terceiros', label:'🤝 Terceiros',       perfis:['Operador','Supervisor'] },
+    { id:'historico', label:'🗂️ Histórico',      perfis:['Supervisor'] },
+    { id:'usuarios',  label:'👥 Usuários',        perfis:['Supervisor'] },
+    { id:'config',    label:'⚙️ Configuração',   perfis:['Supervisor'] },
   ];
   const cont = document.getElementById('abas');
   cont.innerHTML = '';
@@ -433,21 +572,22 @@ function showTab(name, btn) {
   document.getElementById('tab-' + name).classList.add('active');
   if (btn) btn.classList.add('active');
   if (name === 'usuarios') carregarUsuarios();
+  if (name === 'terceiros') renderTerceiros();
 }
 
+// ─── UPLOAD PLANILHA COLABORADORES ──────────────────────────────────────────
 document.getElementById('file-input').addEventListener('change', function(e) {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
     try {
-      const wb   = XLSX.read(ev.target.result, { type: 'binary' });
-      const ws   = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      colaboradores = {};
-      let count = 0;
-      for (let i = 1; i < data.length; i++) {
+      const wb = XLSX.read(ev.target.result, {type:'binary'});
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(ws, {header:1});
+      colaboradores = {}; let count = 0;
+      for (let i=1; i<data.length; i++) {
         const row = data[i];
-        if (row[0] && row[1]) { colaboradores[String(row[0]).trim()] = String(row[1]).trim(); count++; }
+        if (row[0]&&row[1]) { colaboradores[String(row[0]).trim()] = String(row[1]).trim(); count++; }
       }
       document.getElementById('file-status').textContent = '✅ ' + count + ' colaboradores — ' + file.name;
       document.getElementById('upload-banner').style.background  = '#d4edda';
@@ -457,6 +597,16 @@ document.getElementById('file-input').addEventListener('change', function(e) {
   reader.readAsBinaryString(file);
 });
 
+// ─── TIPO COLABORADOR ────────────────────────────────────────────────────────
+function setTipo(tipo) {
+  tipoAtual = tipo;
+  document.getElementById('btn-tipo-interno').classList.toggle('sel', tipo==='interno');
+  document.getElementById('btn-tipo-terceiro').classList.toggle('sel', tipo==='terceiro');
+  document.getElementById('bloco-interno').style.display   = tipo==='interno'  ? '' : 'none';
+  document.getElementById('bloco-terceiro').style.display  = tipo==='terceiro' ? '' : 'none';
+}
+
+// ─── MATRÍCULA (interno) ─────────────────────────────────────────────────────
 document.getElementById('inp-matricula').addEventListener('input', function() {
   const mat = this.value.trim();
   const msg = document.getElementById('msg-matricula');
@@ -472,57 +622,307 @@ document.getElementById('inp-matricula').addEventListener('input', function() {
   }
 });
 
+// ─── CPF (terceiro) ──────────────────────────────────────────────────────────
+function formatarCPF(el) {
+  let v = el.value.replace(/\D/g,'');
+  if (v.length > 11) v = v.slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,'$1.$2')
+        .replace(/(\d{3})(\d)/,'$1.$2')
+        .replace(/(\d{3})(\d{1,2})$/,'$1-$2');
+  el.value = v;
+}
+
+function formatarFone(el) {
+  let v = el.value.replace(/\D/g,'');
+  if (v.length > 11) v = v.slice(0,11);
+  v = v.replace(/^(\d{2})(\d)/,'($1) $2');
+  if (v.replace(/\D/g,'').length > 10)
+    v = v.replace(/(\) \d{5})(\d)/,'$1-$2');
+  else
+    v = v.replace(/(\) \d{4})(\d)/,'$1-$2');
+  el.value = v;
+}
+
+function buscarTerceiro() {
+  const cpf = document.getElementById('inp-cpf-busca').value.trim();
+  const msg  = document.getElementById('msg-cpf');
+  const t    = terceiros.find(t => t.cpf === cpf && t.ativo);
+  terceiroBuscado = null;
+  if (cpf.length < 14) {
+    msg.textContent=''; limparCamposTerc(); return;
+  }
+  if (t) {
+    terceiroBuscado = t;
+    document.getElementById('inp-nome-terc').value    = t.nome;
+    document.getElementById('inp-empresa-terc').value = t.empresa;
+    msg.textContent = '✓ Terceiro encontrado: ' + t.empresa; msg.className='msg-ok';
+  } else {
+    limparCamposTerc();
+    msg.innerHTML = 'CPF não cadastrado. <a href="#" onclick="abrirModalTerceiro(null,true);return false;" style="color:#0d6efd;font-weight:600;">Cadastrar agora?</a>';
+    msg.className = 'msg-err';
+  }
+}
+
+function limparCamposTerc() {
+  document.getElementById('inp-nome-terc').value    = '';
+  document.getElementById('inp-empresa-terc').value = '';
+}
+
+// ─── REGISTRAR RETIRADA ──────────────────────────────────────────────────────
 async function registrarRetirada() {
-  const mat      = document.getElementById('inp-matricula').value.trim();
-  const nome     = document.getElementById('inp-nome').value.trim();
-  const turno    = document.getElementById('inp-turno').value;
-  const aparelho = document.getElementById('inp-aparelho').value.trim();
-  const serie    = document.getElementById('inp-serie').value.trim();
-  if (!mat || !nome || !aparelho || !serie) { alert('Preencha todos os campos.'); return; }
-  if (registros.find(r => r.serie === serie && !r.devolucao)) { alert('Coletor ' + serie + ' já está em uso!'); return; }
-  const reg = { id: Date.now(), data: new Date().toLocaleDateString('pt-BR'), matricula: mat, nome, turno, aparelho, serie, retirada: agora(), devolucao: null, operador: sessao.nome };
+  let mat, nome, turno, aparelho, serie, empresa='', cpf='';
+  if (tipoAtual === 'interno') {
+    mat      = document.getElementById('inp-matricula').value.trim();
+    nome     = document.getElementById('inp-nome').value.trim();
+    turno    = document.getElementById('inp-turno').value;
+    aparelho = document.getElementById('inp-aparelho').value.trim();
+    serie    = document.getElementById('inp-serie').value.trim();
+    if (!mat||!nome||!aparelho||!serie) { alert('Preencha todos os campos.'); return; }
+  } else {
+    if (!terceiroBuscado) { alert('Busque e selecione um terceiro pelo CPF.'); return; }
+    cpf      = terceiroBuscado.cpf;
+    nome     = terceiroBuscado.nome;
+    empresa  = terceiroBuscado.empresa;
+    mat      = cpf;
+    turno    = document.getElementById('inp-turno-terc').value;
+    aparelho = document.getElementById('inp-aparelho-terc').value.trim();
+    serie    = document.getElementById('inp-serie-terc').value.trim();
+    if (!aparelho||!serie) { alert('Preencha aparelho e nº de série.'); return; }
+  }
+  if (registros.find(r => r.serie===serie && !r.devolucao)) { alert('Coletor '+serie+' já está em uso!'); return; }
+
+  const reg = {
+    id:Date.now(), data:new Date().toLocaleDateString('pt-BR'),
+    tipo:tipoAtual, matricula:mat, cpf, nome, empresa,
+    turno, aparelho, serie, retirada:agora(), devolucao:null, operador:sessao.nome
+  };
   registros.push(reg);
   localStorage.setItem('coletores_registros', JSON.stringify(registros));
   limparForm(); renderizar();
-  await post({ acao: 'registrarRetirada', ...reg });
-  toast('✅ Retirada registrada!');
+  await post({acao:'registrarRetirada', ...reg});
+  toast('✅ Retirada registrada!', '#1a3a5c');
 }
 
+// ─── DEVOLUÇÃO / EXCLUIR ─────────────────────────────────────────────────────
 async function registrarDevolucao(id) {
-  const reg = registros.find(r => r.id === id); if (!reg) return;
+  const reg = registros.find(r => r.id===id); if (!reg) return;
   reg.devolucao = agora();
   localStorage.setItem('coletores_registros', JSON.stringify(registros));
   renderizar();
-  await post({ acao: 'registrarDevolucao', id: reg.id, serie: reg.serie, devolucao: reg.devolucao });
-  toast('✅ Devolução registrada!');
+  await post({acao:'registrarDevolucao', id:reg.id, serie:reg.serie, devolucao:reg.devolucao});
+  toast('✅ Devolução registrada!', '#28a745');
 }
 
 function excluir(id) {
   if (!confirm('Excluir este registro?')) return;
-  registros = registros.filter(r => r.id !== id);
+  registros = registros.filter(r => r.id!==id);
   localStorage.setItem('coletores_registros', JSON.stringify(registros));
   renderizar();
 }
 
+// ─── RENDERIZAR TURNO ────────────────────────────────────────────────────────
+function renderizar() {
+  const tbody = document.getElementById('tbody-registros');
+  const hoje  = new Date().toLocaleDateString('pt-BR');
+  const regs  = registros.filter(r => r.data===hoje);
+
+  if (!regs.length) {
+    tbody.innerHTML = '<tr><td colspan="11" class="empty">Nenhum registro ainda</td></tr>';
+  } else {
+    tbody.innerHTML = regs.slice().reverse().map(r =>
+      '<tr>' +
+      '<td><span class="badge ' + (r.tipo==='terceiro' ? 'badge-terceiro' : 'badge-interno') + '">' + (r.tipo==='terceiro' ? '🤝 Terceiro' : '🏭 Interno') + '</span></td>' +
+      '<td>' + (r.tipo==='terceiro' ? r.cpf : r.matricula) + '</td>' +
+      '<td>' + r.nome + '</td>' +
+      '<td>' + (r.empresa || '—') + '</td>' +
+      '<td><span class="badge badge-' + (r.turno||'').toLowerCase() + '">' + r.turno + '</span></td>' +
+      '<td>' + r.aparelho + '</td>' +
+      '<td><strong>' + r.serie + '</strong></td>' +
+      '<td>' + r.retirada + '</td>' +
+      '<td>' + (r.devolucao||'—') + '</td>' +
+      '<td><span class="badge ' + (r.devolucao ? 'badge-devolvido':'badge-pendente') + '">' + (r.devolucao?'Devolvido':'Pendente') + '</span></td>' +
+      '<td style="display:flex;gap:6px;">' +
+      (!r.devolucao ? '<button class="btn-success btn-sm" onclick="registrarDevolucao('+r.id+')">Devolver</button>' : '') +
+      '<button class="btn-danger btn-sm" onclick="excluir('+r.id+')">✕</button>' +
+      '</td></tr>'
+    ).join('');
+  }
+
+  const devolvidos = regs.filter(r => r.devolucao).length;
+  document.getElementById('stat-total').textContent      = regs.length;
+  document.getElementById('stat-devolvidos').textContent = devolvidos;
+  document.getElementById('stat-pendentes').textContent  = regs.length - devolvidos;
+
+  const pends = regs.filter(r => !r.devolucao);
+  document.getElementById('pendencias-list').innerHTML = !pends.length
+    ? '<div class="empty">Nenhuma pendência ✅</div>'
+    : pends.map(r => {
+        const [h,m] = r.retirada.split(':').map(Number);
+        const ret   = new Date(); ret.setHours(h,m,0);
+        const diff  = Math.floor((new Date()-ret)/60000);
+        const tempo = diff<60 ? diff+'min' : Math.floor(diff/60)+'h'+(diff%60)+'min';
+        const extra = r.tipo==='terceiro' ? ' · '+r.empresa : '';
+        return '<div class="pendencia-item"><div class="info">' +
+          '<strong>' + r.nome + ' <span style="color:#aaa;font-weight:400">· ' + (r.tipo==='terceiro'?r.cpf:r.matricula) + extra + '</span></strong>' +
+          '<span>Turno '+r.turno+' · '+r.aparelho+' · Série: '+r.serie+' · Retirada às '+r.retirada+'</span></div>' +
+          '<div style="display:flex;align-items:center;gap:12px;"><span style="font-size:0.85rem;font-weight:700;color:#e67e22;">⏱ '+tempo+'</span>' +
+          '<button class="btn-success btn-sm" onclick="registrarDevolucao('+r.id+')">Devolver</button></div></div>';
+      }).join('');
+}
+
+// ─── TERCEIROS CRUD ──────────────────────────────────────────────────────────
+function renderTerceiros(lista) {
+  const todos = lista || terceiros.filter(t => t.ativo !== false);
+  const tbody = document.getElementById('tbody-terceiros');
+  if (!todos.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nenhum terceiro cadastrado</td></tr>'; return;
+  }
+  tbody.innerHTML = todos.map(t =>
+    '<tr>' +
+    '<td><strong>' + t.nome + '</strong></td>' +
+    '<td style="font-family:monospace">' + t.cpf + '</td>' +
+    '<td>' + t.empresa + '</td>' +
+    '<td style="font-size:0.8rem;color:#888">' + (t.cadastradoEm||'—') + '</td>' +
+    '<td><span class="badge ' + (t.ativo!==false?'badge-ativo':'badge-inativo') + '">' + (t.ativo!==false?'Ativo':'Inativo') + '</span></td>' +
+    '<td style="display:flex;gap:6px;">' +
+    '<button class="btn-warn btn-sm" onclick=\'abrirModalTerceiro(' + JSON.stringify(t).replace(/'/g,"&#39;") + ',false)\'>Editar</button>' +
+    '<button class="btn-danger btn-sm" onclick="desativarTerceiro(\'' + t.id + '\')">Desativar</button>' +
+    '</td></tr>'
+  ).join('');
+}
+
+function filtrarTerceiros() {
+  const q = document.getElementById('busca-terceiro').value.toLowerCase();
+  const filtrado = terceiros.filter(t =>
+    t.nome.toLowerCase().includes(q) || t.cpf.includes(q) || t.empresa.toLowerCase().includes(q)
+  );
+  renderTerceiros(filtrado);
+}
+
+function abrirModalTerceiro(t, redirecionarDepois) {
+  voltarParaRetirada = !!redirecionarDepois;
+  document.getElementById('modal-terc-erro').textContent = '';
+  document.getElementById('modal-terc-id').value      = t ? t.id   : '';
+  document.getElementById('modal-terc-nome').value    = t ? t.nome : '';
+  document.getElementById('modal-terc-cpf').value     = t ? t.cpf  : (document.getElementById('inp-cpf-busca')?.value || '');
+  document.getElementById('modal-terc-empresa').value = t ? t.empresa : '';
+  document.getElementById('modal-terc-fone').value    = t ? (t.fone||'') : '';
+  document.getElementById('modal-terc-titulo').textContent = t ? 'Editar Terceiro' : 'Cadastrar Terceiro';
+  document.getElementById('modal-bg-terceiro').classList.add('open');
+}
+
+function fecharModalTerceiro() {
+  document.getElementById('modal-bg-terceiro').classList.remove('open');
+}
+
+async function salvarTerceiro() {
+  const id      = document.getElementById('modal-terc-id').value;
+  const nome    = document.getElementById('modal-terc-nome').value.trim();
+  const cpf     = document.getElementById('modal-terc-cpf').value.trim();
+  const empresa = document.getElementById('modal-terc-empresa').value.trim();
+  const fone    = document.getElementById('modal-terc-fone').value.trim();
+  const erro    = document.getElementById('modal-terc-erro');
+
+  if (!nome)    { erro.textContent='Nome obrigatório.'; return; }
+  if (!cpf || cpf.length<14) { erro.textContent='CPF inválido.'; return; }
+  if (!empresa) { erro.textContent='Empresa obrigatória.'; return; }
+
+  // Verificar CPF duplicado (exceto na edição do mesmo)
+  const existente = terceiros.find(t => t.cpf===cpf && t.id!==id);
+  if (existente) { erro.textContent='CPF já cadastrado para '+existente.nome+'.'; return; }
+
+  if (id) {
+    const idx = terceiros.findIndex(t => t.id===id);
+    if (idx>=0) Object.assign(terceiros[idx], {nome,cpf,empresa,fone});
+  } else {
+    terceiros.push({ id:Date.now().toString(), nome, cpf, empresa, fone, ativo:true, cadastradoEm:new Date().toLocaleDateString('pt-BR') });
+  }
+  localStorage.setItem('coletores_terceiros', JSON.stringify(terceiros));
+  fecharModalTerceiro();
+  renderTerceiros();
+  await post({acao:'salvarTerceiro', id:id||null, nome, cpf, empresa, fone});
+  toast('✅ Terceiro salvo!', '#1a3a5c');
+
+  if (voltarParaRetirada) {
+    // Preencher campos automaticamente após cadastro
+    const novoTerc = terceiros.find(t => t.cpf===cpf);
+    if (novoTerc) {
+      terceiroBuscado = novoTerc;
+      document.getElementById('inp-cpf-busca').value    = cpf;
+      document.getElementById('inp-nome-terc').value    = nome;
+      document.getElementById('inp-empresa-terc').value = empresa;
+      document.getElementById('msg-cpf').textContent    = '✓ Cadastrado e selecionado!';
+      document.getElementById('msg-cpf').className      = 'msg-ok';
+    }
+    setTipo('terceiro');
+  }
+}
+
+function desativarTerceiro(id) {
+  if (!confirm('Desativar este terceiro?')) return;
+  const idx = terceiros.findIndex(t => t.id===id);
+  if (idx>=0) terceiros[idx].ativo = false;
+  localStorage.setItem('coletores_terceiros', JSON.stringify(terceiros));
+  renderTerceiros();
+  toast('Terceiro desativado.', '#e67e22');
+}
+
+// ─── HISTÓRICO ───────────────────────────────────────────────────────────────
 async function buscarHistorico() {
   const url   = localStorage.getItem('coletores_script_url');
   const data  = document.getElementById('hist-data').value;
   const turno = document.getElementById('hist-turno').value;
+  const tipo  = document.getElementById('hist-tipo').value;
   const tbody = document.getElementById('tbody-historico');
-  if (!url)  { tbody.innerHTML = '<tr><td colspan="9" class="empty">Configure a URL primeiro</td></tr>'; return; }
+  if (!url)  { tbody.innerHTML = '<tr><td colspan="11" class="empty">Configure a URL primeiro</td></tr>'; return; }
   if (!data) { alert('Selecione uma data.'); return; }
-  tbody.innerHTML = '<tr><td colspan="9" class="empty">Carregando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="11" class="empty">Carregando...</td></tr>';
   try {
-    const params = new URLSearchParams({ acao: 'historico', data: data.split('-').reverse().join('/'), turno });
+    const params = new URLSearchParams({acao:'historico', data:data.split('-').reverse().join('/'), turno, tipo});
     const res    = await fetch(url + '?' + params);
     const json   = await res.json();
-    if (!json.registros || !json.registros.length) { tbody.innerHTML = '<tr><td colspan="9" class="empty">Nenhum registro</td></tr>'; return; }
-    tbody.innerHTML = json.registros.map(r =>
-      '<tr><td>' + r.data + '</td><td><span class="badge badge-' + (r.turno||'').toLowerCase() + '">' + r.turno + '</span></td><td>' + r.matricula + '</td><td>' + r.nome + '</td><td>' + r.aparelho + '</td><td><strong>' + r.serie + '</strong></td><td>' + r.retirada + '</td><td>' + (r.devolucao || '—') + '</td><td><span class="badge ' + (r.devolucao ? 'badge-devolvido' : 'badge-pendente') + '">' + (r.devolucao ? 'Devolvido' : 'Pendente') + '</span></td></tr>'
-    ).join('');
-  } catch { tbody.innerHTML = '<tr><td colspan="9" class="empty">Erro ao buscar</td></tr>'; }
+    dadosHistorico = json.registros || [];
+    renderHistorico(dadosHistorico);
+  } catch { tbody.innerHTML = '<tr><td colspan="11" class="empty">Erro ao buscar</td></tr>'; }
 }
 
+function renderHistorico(lista) {
+  const tbody = document.getElementById('tbody-historico');
+  if (!lista.length) { tbody.innerHTML = '<tr><td colspan="11" class="empty">Nenhum registro</td></tr>'; return; }
+  tbody.innerHTML = lista.map(r =>
+    '<tr>' +
+    '<td>' + r.data + '</td>' +
+    '<td><span class="badge ' + (r.tipo==='terceiro'?'badge-terceiro':'badge-interno') + '">' + (r.tipo==='terceiro'?'Terceiro':'Interno') + '</span></td>' +
+    '<td><span class="badge badge-' + (r.turno||'').toLowerCase() + '">' + r.turno + '</span></td>' +
+    '<td style="font-family:monospace">' + (r.tipo==='terceiro'?r.cpf:r.matricula) + '</td>' +
+    '<td>' + r.nome + '</td>' +
+    '<td>' + (r.empresa||'—') + '</td>' +
+    '<td>' + r.aparelho + '</td>' +
+    '<td><strong>' + r.serie + '</strong></td>' +
+    '<td>' + r.retirada + '</td>' +
+    '<td>' + (r.devolucao||'—') + '</td>' +
+    '<td><span class="badge ' + (r.devolucao?'badge-devolvido':'badge-pendente') + '">' + (r.devolucao?'Devolvido':'Pendente') + '</span></td>' +
+    '</tr>'
+  ).join('');
+}
+
+function exportarExcel() {
+  if (!dadosHistorico.length) { toast('Carregue o histórico primeiro.', '#dc3545'); return; }
+  const linhas = [['Data','Tipo','Turno','Matrícula / CPF','Nome','Empresa','Aparelho','Nº Série','Retirada','Devolução','Status']];
+  dadosHistorico.forEach(r => linhas.push([
+    r.data, r.tipo==='terceiro'?'Terceiro':'Interno', r.turno,
+    r.tipo==='terceiro'?r.cpf:r.matricula, r.nome, r.empresa||'',
+    r.aparelho, r.serie, r.retirada, r.devolucao||'', r.devolucao?'Devolvido':'Pendente'
+  ]));
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(linhas);
+  ws['!cols'] = [12,10,8,16,28,20,18,14,10,10,12].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws, 'Histórico');
+  XLSX.writeFile(wb, 'Coletores_CD107_' + new Date().toISOString().split('T')[0] + '.xlsx');
+  toast('✅ Excel exportado!', '#28a745');
+}
+
+// ─── USUÁRIOS ────────────────────────────────────────────────────────────────
 async function carregarUsuarios() {
   const tbody = document.getElementById('tbody-usuarios');
   tbody.innerHTML = '<tr><td colspan="5" class="empty">Carregando...</td></tr>';
@@ -530,37 +930,35 @@ async function carregarUsuarios() {
     const url  = localStorage.getItem('coletores_script_url');
     const res  = await fetch(url + '?acao=listarUsuarios');
     const data = await res.json();
-    if (!data.usuarios || !data.usuarios.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">Nenhum usuário</td></tr>'; return; }
+    if (!data.usuarios?.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">Nenhum usuário</td></tr>'; return; }
     tbody.innerHTML = data.usuarios.map(u =>
-      '<tr><td>' + u.nome + '</td><td>' + u.usuario + '</td>' +
-      '<td><span class="badge badge-' + u.perfil.toLowerCase() + '">' + u.perfil + '</span></td>' +
-      '<td><span class="badge ' + (u.ativo === 'Sim' ? 'badge-ativo' : 'badge-inativo') + '">' + u.ativo + '</span></td>' +
+      '<tr><td>'+u.nome+'</td><td>'+u.usuario+'</td>' +
+      '<td><span class="badge badge-'+u.perfil.toLowerCase()+'">'+u.perfil+'</span></td>' +
+      '<td><span class="badge '+(u.ativo==='Sim'?'badge-ativo':'badge-inativo')+'">'+u.ativo+'</span></td>' +
       '<td style="display:flex;gap:6px;">' +
-      '<button class="btn-warn btn-sm" onclick=\'abrirModalUsuario(' + JSON.stringify(u) + ')\'>Editar</button>' +
-      '<button class="btn-danger btn-sm" onclick="desativarUsuario(\'' + u.id + '\',\'' + u.nome + '\')">Desativar</button>' +
+      '<button class="btn-warn btn-sm" onclick=\'abrirModalUsuario('+JSON.stringify(u)+')\'>Editar</button>' +
+      '<button class="btn-danger btn-sm" onclick="desativarUsuario(\''+u.id+'\',\''+u.nome+'\')">Desativar</button>' +
       '</td></tr>'
     ).join('');
   } catch { tbody.innerHTML = '<tr><td colspan="5" class="empty">Erro ao carregar</td></tr>'; }
 }
 
 function abrirModalUsuario(u) {
-  document.getElementById('modal-erro').textContent       = '';
-  document.getElementById('modal-id').value               = u ? u.id    : '';
-  document.getElementById('modal-nome').value             = u ? u.nome  : '';
+  document.getElementById('modal-erro').textContent = '';
+  document.getElementById('modal-id').value               = u ? u.id      : '';
+  document.getElementById('modal-nome').value             = u ? u.nome    : '';
   document.getElementById('modal-usuario-input').value    = u ? u.usuario : '';
   document.getElementById('modal-usuario-input').readOnly = !!u;
   document.getElementById('modal-usuario-input').style.background = u ? '#f8f9fa' : '';
   document.getElementById('modal-senha').value            = '';
-  document.getElementById('modal-perfil').value           = u ? u.perfil : 'Operador';
-  document.getElementById('modal-ativo').value            = u && u.ativo === 'Sim' ? '1' : '0';
+  document.getElementById('modal-perfil').value           = u ? u.perfil  : 'Operador';
+  document.getElementById('modal-ativo').value            = u && u.ativo==='Sim' ? '1' : '0';
   document.getElementById('campo-ativo').style.display    = u ? 'block' : 'none';
   document.getElementById('modal-titulo').textContent     = u ? 'Editar Usuário' : 'Novo Usuário';
   document.getElementById('modal-bg-usuario').classList.add('open');
 }
 
-function fecharModal() {
-  document.getElementById('modal-bg-usuario').classList.remove('open');
-}
+function fecharModal() { document.getElementById('modal-bg-usuario').classList.remove('open'); }
 
 async function salvarUsuario() {
   const id      = document.getElementById('modal-id').value;
@@ -568,24 +966,25 @@ async function salvarUsuario() {
   const usuario = document.getElementById('modal-usuario-input').value.trim();
   const senha   = document.getElementById('modal-senha').value.trim();
   const perfil  = document.getElementById('modal-perfil').value;
-  const ativo   = document.getElementById('modal-ativo').value === '1';
+  const ativo   = document.getElementById('modal-ativo').value==='1';
   const erro    = document.getElementById('modal-erro');
-  if (!nome || !usuario) { erro.textContent = 'Nome e usuário são obrigatórios.'; return; }
-  if (!id && !senha)     { erro.textContent = 'Informe uma senha para o novo usuário.'; return; }
+  if (!nome||!usuario) { erro.textContent='Nome e usuário são obrigatórios.'; return; }
+  if (!id&&!senha)     { erro.textContent='Informe uma senha para o novo usuário.'; return; }
   try {
-    const data = await post({ acao: 'salvarUsuario', id: id || null, nome, usuario, senha, perfil, ativo });
-    if (data && data.ok) { fecharModal(); carregarUsuarios(); toast('✅ Usuário salvo!'); }
-    else { erro.textContent = (data && data.erro) || 'Erro ao salvar.'; }
+    const data = await post({acao:'salvarUsuario', id:id||null, nome, usuario, senha, perfil, ativo});
+    if (data?.ok) { fecharModal(); carregarUsuarios(); toast('✅ Usuário salvo!', '#1a3a5c'); }
+    else { erro.textContent = data?.erro || 'Erro ao salvar.'; }
   } catch { erro.textContent = 'Erro de conexão.'; }
 }
 
 async function desativarUsuario(id, nome) {
-  if (!confirm('Desativar o usuário "' + nome + '"?')) return;
-  await post({ acao: 'excluirUsuario', id });
+  if (!confirm('Desativar o usuário "'+nome+'"?')) return;
+  await post({acao:'excluirUsuario', id});
   carregarUsuarios();
-  toast('Usuário desativado.');
+  toast('Usuário desativado.', '#e67e22');
 }
 
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
 function salvarUrl() {
   const url = document.getElementById('inp-script-url').value.trim();
   localStorage.setItem('coletores_script_url', url);
@@ -598,77 +997,41 @@ async function testarUrl() {
   if (!url) { st.innerHTML = '<span style="color:#dc3545">Informe a URL</span>'; return; }
   st.textContent = 'Testando...';
   try {
-    const res  = await fetch(url + '?acao=ping');
+    const res  = await fetch(url+'?acao=ping');
     const data = await res.json();
     st.innerHTML = data.ok ? '<span style="color:#28a745">✅ Conexão OK!</span>' : '<span style="color:#dc3545">❌ Resposta inesperada</span>';
   } catch { st.innerHTML = '<span style="color:#dc3545">❌ Falha na conexão</span>'; }
 }
 
-function agora() {
-  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-}
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function agora() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 
-function toast(msg) {
+function toast(msg, cor='#1a3a5c') {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.style.display = 'block';
-  setTimeout(() => t.style.display = 'none', 2500);
+  t.textContent=msg; t.style.background=cor; t.style.display='block';
+  clearTimeout(t._t); t._t=setTimeout(()=>t.style.display='none',2500);
 }
 
 async function post(body) {
   const url = localStorage.getItem('coletores_script_url');
   if (!url) return null;
   try {
-    const res = await fetch(url, { method: 'POST', body: JSON.stringify(body), headers: { 'Content-Type': 'text/plain' } });
+    const res = await fetch(url,{method:'POST',body:JSON.stringify(body),headers:{'Content-Type':'text/plain'}});
     return await res.json();
-  } catch (e) { console.warn('Sheets offline:', e); return null; }
+  } catch(e) { console.warn('Sheets offline:',e); return null; }
 }
 
 function limparForm() {
-  ['inp-matricula','inp-nome','inp-aparelho','inp-serie'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('inp-nome').readOnly = true;
-  document.getElementById('msg-matricula').textContent = '';
-}
-
-function renderizar() {
-  const tbody = document.getElementById('tbody-registros');
-  const hoje  = new Date().toLocaleDateString('pt-BR');
-  const regs  = registros.filter(r => r.data === hoje);
-
-  if (regs.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="9" class="empty">Nenhum registro ainda</td></tr>';
-  } else {
-    tbody.innerHTML = regs.slice().reverse().map(r =>
-      '<tr><td>' + r.matricula + '</td><td>' + r.nome + '</td>' +
-      '<td><span class="badge badge-' + (r.turno||'').toLowerCase() + '">' + r.turno + '</span></td>' +
-      '<td>' + r.aparelho + '</td><td><strong>' + r.serie + '</strong></td>' +
-      '<td>' + r.retirada + '</td><td>' + (r.devolucao || '—') + '</td>' +
-      '<td><span class="badge ' + (r.devolucao ? 'badge-devolvido' : 'badge-pendente') + '">' + (r.devolucao ? 'Devolvido' : 'Pendente') + '</span></td>' +
-      '<td style="display:flex;gap:6px;">' +
-      (!r.devolucao ? '<button class="btn-success btn-sm" onclick="registrarDevolucao(' + r.id + ')">Devolver</button>' : '') +
-      '<button class="btn-danger btn-sm" onclick="excluir(' + r.id + ')">✕</button>' +
-      '</td></tr>'
-    ).join('');
-  }
-
-  const devolvidos = regs.filter(r => r.devolucao).length;
-  document.getElementById('stat-total').textContent      = regs.length;
-  document.getElementById('stat-devolvidos').textContent = devolvidos;
-  document.getElementById('stat-pendentes').textContent  = regs.length - devolvidos;
-
-  const pends = regs.filter(r => !r.devolucao);
-  document.getElementById('pendencias-list').innerHTML = pends.length === 0
-    ? '<div class="empty">Nenhuma pendência ✅</div>'
-    : pends.map(r => {
-        const [h,m] = r.retirada.split(':').map(Number);
-        const ret   = new Date(); ret.setHours(h,m,0);
-        const diff  = Math.floor((new Date()-ret)/60000);
-        const tempo = diff < 60 ? diff + 'min' : Math.floor(diff/60) + 'h' + (diff%60) + 'min';
-        return '<div class="pendencia-item"><div class="info"><strong>' + r.nome +
-          ' <span style="color:#aaa;font-weight:400">· ' + r.matricula + '</span></strong>' +
-          '<span>Turno ' + r.turno + ' · ' + r.aparelho + ' · Série: ' + r.serie + ' · Retirada às ' + r.retirada + '</span></div>' +
-          '<div style="display:flex;align-items:center;gap:12px;"><span style="font-size:0.85rem;font-weight:700;color:#e67e22;">⏱ ' + tempo + '</span>' +
-          '<button class="btn-success btn-sm" onclick="registrarDevolucao(' + r.id + ')">Devolver</button></div></div>';
-      }).join('');
+  ['inp-matricula','inp-nome','inp-aparelho','inp-serie'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('inp-nome').readOnly=true;
+  document.getElementById('msg-matricula').textContent='';
+  document.getElementById('inp-cpf-busca').value='';
+  document.getElementById('inp-nome-terc').value='';
+  document.getElementById('inp-empresa-terc').value='';
+  document.getElementById('inp-aparelho-terc').value='';
+  document.getElementById('inp-serie-terc').value='';
+  document.getElementById('msg-cpf').textContent='';
+  terceiroBuscado=null;
 }
 </script>
 </body>
