@@ -156,6 +156,11 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .btn-url-salvar { width: 100%; background: #f0f4ff; color: #2d6a9f; border: 1.5px solid #c0d0f0; border-radius: 7px; padding: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
 .btn-url-salvar:hover { background: #dde8ff; }
 #login-url-status { font-size: 0.75rem; min-height: 14px; margin-top: 4px; text-align: center; }
+
+/* GESTÃO */
+.tr-selecionado { background: #fff3cd !important; }
+tbody tr.tr-selecionado:hover { background: #ffe8a0 !important; }
+input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-color: #1a3a5c; }
 </style>
 </head>
 <body>
@@ -203,7 +208,10 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
         <span>📂 Planilha de colaboradores (matrícula + nome)</span>
         <div id="file-status">Nenhuma planilha carregada</div>
       </div>
-      <label class="btn-upload-label" for="file-input">Carregar / Atualizar Planilha</label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label class="btn-upload-label" for="file-input">Carregar / Atualizar Planilha</label>
+        <button id="btn-limpar-planilha" onclick="limparPlanilha()" style="display:none;background:#dc3545;color:white;border:none;border-radius:6px;padding:7px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;">🗑 Limpar</button>
+      </div>
       <input type="file" id="file-input" accept=".xlsx,.xls" style="display:none">
     </div>
 
@@ -348,6 +356,25 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
       </div>
     </div>
 
+    <!-- ═══════ ABA AUDITORIA ═══════ -->
+    <div id="tab-auditoria" class="tab-content">
+      <div class="card">
+        <h2>🔍 Log de Auditoria — Exclusões
+          <button class="btn-danger btn-sm" onclick="limparAuditoria()">Limpar Log</button>
+        </h2>
+        <p style="font-size:0.82rem;color:#888;margin-bottom:14px;">Registro de todas as exclusões realizadas por supervisores e administradores.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Data/Hora</th><th>Operador</th><th>Perfil</th>
+              <th>Nome Excluído</th><th>Série</th><th>Motivo</th>
+            </tr></thead>
+            <tbody id="tbody-auditoria"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══════ ABA HISTÓRICO ═══════ -->
     <div id="tab-historico" class="tab-content">
       <div class="card">
@@ -389,7 +416,7 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
             <thead><tr>
               <th>Data</th><th>Tipo</th><th>Turno</th><th>Matrícula / CPF</th>
               <th>Nome</th><th>Empresa</th><th>Aparelho</th><th>Nº Série</th>
-              <th>Retirada</th><th>Devolução</th><th>Status</th><th>Ocorrência</th>
+              <th>Retirada</th><th>Devolução</th><th>Status</th><th>Ocorrência</th><th id="th-acao-hist"></th>
             </tr></thead>
             <tbody id="tbody-historico"><tr><td colspan="11" class="empty">Use os filtros acima</td></tr></tbody>
           </table>
@@ -408,6 +435,76 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
             <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody id="tbody-usuarios"><tr><td colspan="5" class="empty">Carregando...</td></tr></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══════ ABA GESTÃO DE DADOS ═══════ -->
+    <div id="tab-gestao" class="tab-content">
+      <div class="card" style="border-left:4px solid #dc3545;">
+        <h2 style="color:#dc3545;">🗑️ Gestão e Exclusão de Dados
+          <span style="font-size:0.75rem;font-weight:400;color:#888;margin-left:8px;">Acesso restrito a Supervisores</span>
+        </h2>
+
+        <!-- FILTROS -->
+        <div class="filtros" style="margin-bottom:16px;">
+          <div class="form-group"><label>Data</label><input type="date" id="gestao-data"></div>
+          <div class="form-group">
+            <label>Turno</label>
+            <select id="gestao-turno">
+              <option value="">Todos</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select id="gestao-status">
+              <option value="">Todos</option>
+              <option value="PENDENTE">Pendente</option>
+              <option value="DEVOLVIDO">Devolvido</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Buscar (nome ou série)</label>
+            <input type="text" id="gestao-busca" placeholder="Nome ou Nº série...">
+          </div>
+          <div style="display:flex;align-items:flex-end;gap:8px;">
+            <button class="btn-primary" onclick="carregarGestao()">Buscar</button>
+            <button class="btn-danger" id="btn-excl-selecionados" style="display:none;" onclick="excluirSelecionados()">🗑️ Excluir Selecionados</button>
+          </div>
+        </div>
+
+        <!-- AÇÕES EM LOTE -->
+        <div id="gestao-lote-bar" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:12px;display:none;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <span id="gestao-lote-info" style="font-size:0.85rem;font-weight:600;color:#856404;"></span>
+          <div style="display:flex;gap:8px;">
+            <button class="btn-primary btn-sm" style="background:#6c757d;" onclick="desmarcarTodos()">Desmarcar todos</button>
+            <button class="btn-danger btn-sm" onclick="excluirSelecionados()">🗑️ Excluir selecionados</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th style="width:36px;"><input type="checkbox" id="chk-todos" onclick="marcarTodos(this)" title="Marcar todos"></th>
+              <th>Data</th><th>Tipo</th><th>Matrícula / CPF</th><th>Nome</th>
+              <th>Aparelho</th><th>Nº Série</th><th>Retirada</th><th>Devolução</th>
+              <th>Status</th><th>Ocorrência</th><th>Ação</th>
+            </tr></thead>
+            <tbody id="tbody-gestao"><tr><td colspan="12" class="empty">Use os filtros acima para carregar registros</td></tr></tbody>
+          </table>
+        </div>
+
+        <!-- ZONA PERIGO -->
+        <div style="margin-top:24px;padding:16px;background:#fff5f5;border:1px solid #f5c6cb;border-radius:8px;">
+          <div style="font-weight:700;color:#dc3545;margin-bottom:10px;">⚠️ Zona de Perigo — Exclusão em Lote</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn-danger btn-sm" onclick="confirmarLimparTudo()">🗑️ Apagar TODOS os registros</button>
+            <button class="btn-danger btn-sm" style="background:#6c757d;" onclick="confirmarLimparData()">🗑️ Apagar todos de uma data específica</button>
+          </div>
         </div>
       </div>
     </div>
@@ -468,6 +565,26 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
   </div>
 </div>
 
+
+<!-- MODAL EXCLUSÃO -->
+<div class="modal-bg" id="modal-bg-exclusao">
+  <div class="modal" style="border-top: 4px solid #dc3545;">
+    <h3 style="color:#dc3545;">🗑️ Excluir Registro</h3>
+    <div id="modal-excl-info" style="background:#fff5f5;border:1px solid #f5c6cb;border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:0.85rem;color:#555;line-height:1.6;"></div>
+    <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:0.82rem;color:#856404;">
+      ⚠️ Esta ação é permanente e não pode ser desfeita. O registro será removido do sistema e do Google Sheets.
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <label>Digite <strong>CONFIRMAR</strong> para prosseguir</label>
+      <input type="text" id="modal-excl-confirmacao" placeholder="CONFIRMAR" oninput="checarConfirmacaoExclusao()">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary" style="background:#6c757d;" onclick="fecharModalExclusao()">Cancelar</button>
+      <button class="btn-danger" id="btn-confirmar-excl" disabled onclick="confirmarExclusao()" style="opacity:0.5;cursor:not-allowed;">🗑️ Excluir Definitivamente</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL DEVOLUÇÃO COM OCORRÊNCIA -->
 <div class="modal-bg" id="modal-bg-devolucao">
   <div class="modal">
@@ -517,9 +634,29 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 
 <div id="toast"></div>
 
+<!-- MODAL EXCLUSÃO -->
+<div class="modal-bg" id="modal-bg-exclusao">
+  <div class="modal" style="border-top: 4px solid #dc3545;">
+    <h3 style="color:#dc3545;">🗑 Excluir Registro</h3>
+    <div id="modal-excl-info" style="background:#fff5f5;border:1px solid #f5c6cb;border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:0.85rem;color:#555;line-height:1.6;"></div>
+    <div style="background:#fff3cd;border-radius:6px;padding:10px 14px;font-size:0.82rem;color:#856404;margin-bottom:16px;">
+      ⚠️ Esta ação é permanente e não pode ser desfeita.
+    </div>
+    <div class="form-group" style="margin-bottom:4px;">
+      <label>Motivo da exclusão <span style="color:#dc3545">*</span></label>
+      <input type="text" id="modal-excl-motivo" placeholder="Informe o motivo (obrigatório)">
+    </div>
+    <div id="modal-excl-erro" style="color:#dc3545;font-size:0.8rem;min-height:16px;margin-top:4px;"></div>
+    <div class="modal-btns">
+      <button class="btn-primary" style="background:#6c757d;" onclick="fecharModalExclusao()">Cancelar</button>
+      <button class="btn-danger" onclick="confirmarExclusao()">🗑 Confirmar Exclusão</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ─── ESTADO GLOBAL ──────────────────────────────────────────────────────────
-let colaboradores = {};
+let colaboradores = JSON.parse(localStorage.getItem('coletores_colaboradores') || '{}');
 let terceiros     = JSON.parse(localStorage.getItem('coletores_terceiros') || '[]');
 let registros     = JSON.parse(localStorage.getItem('coletores_registros') || '[]');
 let sessao        = JSON.parse(localStorage.getItem('coletores_sessao')    || 'null');
@@ -535,12 +672,14 @@ window.onload = () => {
   document.getElementById('inp-script-url').value = _urlSalva;
   document.getElementById('login-url-input').value = _urlSalva;
   document.getElementById('hist-data').value = new Date().toISOString().split('T')[0];
+  atualizarBannerColaboradores();
   verificarSessao();
   setInterval(atualizarRelogio, 1000);
   atualizarRelogio();
   document.getElementById('login-senha').addEventListener('keydown', e => { if (e.key==='Enter') fazerLogin(); });
   document.getElementById('modal-bg-usuario').addEventListener('click', e => { if (e.target===document.getElementById('modal-bg-usuario')) fecharModal(); });
   document.getElementById('modal-bg-terceiro').addEventListener('click', e => { if (e.target===document.getElementById('modal-bg-terceiro')) fecharModalTerceiro(); });
+  document.getElementById('modal-bg-exclusao').addEventListener('click', e => { if (e.target===document.getElementById('modal-bg-exclusao')) fecharModalExclusao(); });
 };
 
 function atualizarRelogio() {
@@ -584,6 +723,9 @@ function entrarApp() {
   document.getElementById('badge-usuario').textContent = sessao.nome + ' · ' + sessao.perfil;
   montarAbas(); renderizar(); renderTerceiros();
   if (sessao.perfil === 'Supervisor') carregarUsuarios();
+  // Mostrar botão limpar planilha só para supervisores
+  const btnLimpar = document.getElementById('btn-limpar-planilha');
+  if (btnLimpar) btnLimpar.style.display = podeExcluir() ? '' : 'none';
 }
 
 function sair() {
@@ -602,6 +744,7 @@ function montarAbas() {
     { id:'terceiros', label:'🤝 Terceiros',       perfis:['Operador','Supervisor'] },
     { id:'historico', label:'🗂️ Histórico',      perfis:['Supervisor'] },
     { id:'usuarios',  label:'👥 Usuários',        perfis:['Supervisor'] },
+    { id:'gestao',    label:'🗑️ Gestão de Dados', perfis:['Supervisor'] },
     { id:'config',    label:'⚙️ Configuração',   perfis:['Supervisor'] },
   ];
   const cont = document.getElementById('abas');
@@ -626,6 +769,7 @@ function showTab(name, btn) {
   if (btn) btn.classList.add('active');
   if (name === 'usuarios') carregarUsuarios();
   if (name === 'terceiros') renderTerceiros();
+  if (name === 'auditoria') renderAuditoria();
 }
 
 // ─── UPLOAD PLANILHA COLABORADORES ──────────────────────────────────────────
@@ -642,9 +786,14 @@ document.getElementById('file-input').addEventListener('change', function(e) {
         const row = data[i];
         if (row[0]&&row[1]) { colaboradores[String(row[0]).trim()] = String(row[1]).trim(); count++; }
       }
-      document.getElementById('file-status').textContent = '✅ ' + count + ' colaboradores — ' + file.name;
-      document.getElementById('upload-banner').style.background  = '#d4edda';
-      document.getElementById('upload-banner').style.borderColor = '#28a745';
+      // Salvar permanentemente no localStorage
+      localStorage.setItem('coletores_colaboradores', JSON.stringify(colaboradores));
+      localStorage.setItem('coletores_colaboradores_info', JSON.stringify({
+        nome: file.name, count, data: new Date().toLocaleDateString('pt-BR'),
+        hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
+      }));
+      atualizarBannerColaboradores();
+      toast('✅ ' + count + ' colaboradores carregados e salvos!', '#28a745');
     } catch { document.getElementById('file-status').textContent = '❌ Erro ao ler planilha'; }
   };
   reader.readAsBinaryString(file);
@@ -797,11 +946,59 @@ async function confirmarDevolucao() {
   toast('✅ Devolução registrada!', '#28a745');
 }
 
-function excluir(id) {
-  if (!confirm('Excluir este registro?')) return;
-  registros = registros.filter(r => r.id!==id);
+let _exclId = null;
+let _exclOrigem = null; // 'turno' ou 'historico'
+
+function excluir(id, origem) {
+  if (!sessao || (sessao.perfil !== 'Supervisor' && sessao.perfil !== 'Administrador')) {
+    toast('Sem permissão para excluir registros.', '#dc3545'); return;
+  }
+  _exclId = id;
+  _exclOrigem = origem || 'turno';
+  const reg = registros.find(r => String(r.id) === String(id));
+  if (!reg) { toast('Registro não encontrado.', '#dc3545'); return; }
+  const info = document.getElementById('modal-excl-info');
+  info.innerHTML =
+    '<strong>' + reg.nome + '</strong> · ' + (reg.tipo==='terceiro'?reg.cpf:reg.matricula) + '<br>' +
+    reg.aparelho + ' · Série: <strong>' + reg.serie + '</strong><br>' +
+    'Data: ' + reg.data + ' · Turno ' + reg.turno + ' · Retirada: ' + reg.retirada +
+    (devolvido(reg) ? ' · Devolução: ' + reg.devolucao : ' · <span style="color:#dc3545;font-weight:600">PENDENTE</span>');
+  document.getElementById('modal-excl-motivo').value = '';
+  document.getElementById('modal-excl-erro').textContent = '';
+  document.getElementById('modal-bg-exclusao').classList.add('open');
+}
+
+function fecharModalExclusao() {
+  document.getElementById('modal-bg-exclusao').classList.remove('open');
+  _exclId = null; _exclOrigem = null;
+}
+
+async function confirmarExclusao() {
+  const motivo = document.getElementById('modal-excl-motivo').value.trim();
+  const erro   = document.getElementById('modal-excl-erro');
+  if (!motivo) { erro.textContent = 'Informe o motivo da exclusão.'; return; }
+  // Registrar auditoria
+  const reg = registros.find(r => String(r.id) === String(_exclId));
+  const log = {
+    acao: 'exclusao', idRegistro: _exclId, motivo,
+    operador: sessao.nome, perfil: sessao.perfil,
+    timestamp: new Date().toLocaleString('pt-BR'),
+    dadosExcluidos: reg ? JSON.stringify(reg) : ''
+  };
+  // Salvar log de auditoria
+  let auditoria = JSON.parse(localStorage.getItem('coletores_auditoria') || '[]');
+  auditoria.push(log);
+  localStorage.setItem('coletores_auditoria', JSON.stringify(auditoria));
+  // Excluir registro
+  registros = registros.filter(r => String(r.id) !== String(_exclId));
   localStorage.setItem('coletores_registros', JSON.stringify(registros));
+  fecharModalExclusao();
   renderizar();
+  if (_exclOrigem === 'historico') renderHistorico(
+    registros.filter(r => r.data === document.getElementById('hist-data').value.split('-').reverse().join('/'))
+  );
+  await post({acao: 'excluirRegistro', id: _exclId, motivo, operador: sessao.nome});
+  toast('Registro excluído.', '#dc3545');
 }
 
 // ─── RENDERIZAR TURNO ────────────────────────────────────────────────────────
@@ -828,7 +1025,7 @@ function renderizar() {
       '<td style="max-width:160px;white-space:normal;font-size:0.8rem;color:#c0392b">' + (r.ocorrenciaDev || r.ocorrencia || '') + '</td>' +
       '<td style="display:flex;gap:6px;">' +
       (!devolvido(r) ? '<button class="btn-success btn-sm" onclick="registrarDevolucao('+r.id+')">Devolver</button>' : '') +
-      '<button class="btn-danger btn-sm" onclick="excluir('+r.id+')">✕</button>' +
+      (podeExcluir() ? '<button class="btn-danger btn-sm" onclick="excluir('+r.id+',\'turno\')">🗑</button>' : '') +
       '</td></tr>'
     ).join('');
   }
@@ -998,6 +1195,9 @@ async function buscarHistorico() {
 }
 
 function renderHistorico(lista) {
+  // Mostrar/ocultar coluna ação no histórico
+  const thAcao = document.getElementById('th-acao-hist');
+  if (thAcao) thAcao.textContent = podeExcluir() ? 'Ação' : '';
   const tbody = document.getElementById('tbody-historico');
   if (!lista.length) { tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro</td></tr>'; return; }
   tbody.innerHTML = lista.map(r =>
@@ -1014,6 +1214,7 @@ function renderHistorico(lista) {
     '<td>' + (r.devolucao||'—') + '</td>' +
     '<td><span class="badge ' + (devolvido(r)?'badge-devolvido':'badge-pendente') + '">' + (devolvido(r)?'Devolvido':'Pendente') + '</span></td>' +
     '<td style="max-width:180px;white-space:normal;font-size:0.8rem;color:#c0392b">' + (r.ocorrenciaDev||r.ocorrencia||'') + '</td>' +
+    (podeExcluir() ? '<td><button class="btn-danger btn-sm" onclick="excluir(\'' + r.id + '\',\'historico\')">🗑</button></td>' : '<td></td>') +
     '</tr>'
   ).join('');
 }
@@ -1114,7 +1315,54 @@ async function testarUrl() {
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 function agora() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+
+function atualizarBannerColaboradores() {
+  const info = JSON.parse(localStorage.getItem('coletores_colaboradores_info') || 'null');
+  const banner = document.getElementById('upload-banner');
+  const status = document.getElementById('file-status');
+  if (info && info.count > 0) {
+    status.innerHTML = '✅ <strong>' + info.count + ' colaboradores</strong> carregados · ' +
+      info.nome + ' · Atualizado em ' + info.data + ' às ' + info.hora;
+    banner.style.background   = '#d4edda';
+    banner.style.borderColor  = '#28a745';
+    // Trocar label do botão
+    const label = banner.querySelector('.btn-upload-label');
+    if (label) label.textContent = '🔄 Atualizar Planilha';
+  } else {
+    status.textContent = '⚠️ Nenhuma planilha carregada — faça o upload para busca automática de nomes';
+    banner.style.background   = '#fff3cd';
+    banner.style.borderColor  = '#ffc107';
+  }
+}
 function devolvido(r) { return r.devolucao && r.devolucao !== ''; }
+function podeExcluir() { return sessao && (sessao.perfil === 'Supervisor' || sessao.perfil === 'Administrador'); }
+
+function renderAuditoria() {
+  const tbody = document.getElementById('tbody-auditoria');
+  const logs = JSON.parse(localStorage.getItem('coletores_auditoria') || '[]');
+  if (!logs.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty">Nenhuma exclusão registrada.</td></tr>'; return;
+  }
+  tbody.innerHTML = logs.slice().reverse().map(l => {
+    let nome = '—', serie = '—';
+    try { const d = JSON.parse(l.dadosExcluidos); nome = d.nome||'—'; serie = d.serie||'—'; } catch{}
+    return '<tr>' +
+      '<td style="white-space:nowrap">' + l.timestamp + '</td>' +
+      '<td><strong>' + l.operador + '</strong></td>' +
+      '<td><span class="badge badge-' + (l.perfil||'').toLowerCase() + '">' + l.perfil + '</span></td>' +
+      '<td>' + nome + '</td>' +
+      '<td style="font-family:monospace">' + serie + '</td>' +
+      '<td style="max-width:200px;white-space:normal;color:#c0392b">' + l.motivo + '</td>' +
+      '</tr>';
+  }).join('');
+}
+
+function limparAuditoria() {
+  if (!confirm('Limpar todo o log de auditoria?')) return;
+  localStorage.removeItem('coletores_auditoria');
+  renderAuditoria();
+  toast('Log de auditoria limpo.', '#6c757d');
+}
 
 function toast(msg, cor='#1a3a5c') {
   const t = document.getElementById('toast');
@@ -1176,6 +1424,16 @@ async function post(body) {
   catch(e) { console.warn('Sheets leitura falhou:', e); return null; }
 }
 
+function limparPlanilha() {
+  if (!podeExcluir()) { toast('Sem permissão.', '#dc3545'); return; }
+  if (!confirm('Remover a planilha de colaboradores salva? Os nomes não serão mais buscados automaticamente.')) return;
+  colaboradores = {};
+  localStorage.removeItem('coletores_colaboradores');
+  localStorage.removeItem('coletores_colaboradores_info');
+  atualizarBannerColaboradores();
+  toast('Planilha removida.', '#6c757d');
+}
+
 function limparForm() {
   ['inp-matricula','inp-nome','inp-aparelho','inp-serie'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('inp-nome').readOnly=true;
@@ -1199,6 +1457,170 @@ function salvarUrlLogin() {
   document.getElementById('inp-script-url').value = url;
   st.innerHTML = '<span style="color:#28a745">✅ URL salva! Faça login.</span>';
 }
+
+// ─── GESTÃO DE DADOS ─────────────────────────────────────────────────────────
+let _gestaoLista = [];
+
+function carregarGestao() {
+  const filtData   = document.getElementById('gestao-data').value;
+  const filtTurno  = document.getElementById('gestao-turno').value;
+  const filtStatus = document.getElementById('gestao-status').value;
+  const filtBusca  = document.getElementById('gestao-busca').value.toLowerCase().trim();
+
+  _gestaoLista = registros.filter(r => {
+    if (filtData) {
+      const dataFmt = filtData.split('-').reverse().join('/');
+      if (r.data !== dataFmt) return false;
+    }
+    if (filtTurno  && r.turno !== filtTurno) return false;
+    if (filtStatus === 'DEVOLVIDO' && !devolvido(r)) return false;
+    if (filtStatus === 'PENDENTE'  &&  devolvido(r)) return false;
+    if (filtBusca && !r.nome.toLowerCase().includes(filtBusca) && !r.serie.toLowerCase().includes(filtBusca)) return false;
+    return true;
+  });
+
+  renderGestao();
+}
+
+function renderGestao() {
+  const tbody = document.getElementById('tbody-gestao');
+  document.getElementById('chk-todos').checked = false;
+  document.getElementById('gestao-lote-bar').style.display = 'none';
+
+  if (!_gestaoLista.length) {
+    tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro encontrado</td></tr>';
+    return;
+  }
+  tbody.innerHTML = _gestaoLista.map(r =>
+    '<tr id="tr-' + r.id + '">' +
+    '<td><input type="checkbox" class="chk-reg" value="' + r.id + '" onclick="atualizarSelecao()"></td>' +
+    '<td>' + r.data + '</td>' +
+    '<td><span class="badge ' + (r.tipo==='terceiro'?'badge-terceiro':'badge-interno') + '">' + (r.tipo==='terceiro'?'Terceiro':'Interno') + '</span></td>' +
+    '<td style="font-family:monospace;font-size:0.82rem">' + (r.tipo==='terceiro'?r.cpf:r.matricula) + '</td>' +
+    '<td><strong>' + r.nome + '</strong></td>' +
+    '<td>' + r.aparelho + '</td>' +
+    '<td style="font-family:monospace">' + r.serie + '</td>' +
+    '<td>' + r.retirada + '</td>' +
+    '<td>' + (r.devolucao||'—') + '</td>' +
+    '<td><span class="badge ' + (devolvido(r)?'badge-devolvido':'badge-pendente') + '">' + (devolvido(r)?'Devolvido':'Pendente') + '</span></td>' +
+    '<td style="font-size:0.8rem;color:#c0392b;max-width:140px;white-space:normal">' + (r.ocorrenciaDev||r.ocorrencia||'') + '</td>' +
+    '<td><button class="btn-danger btn-sm" onclick="abrirModalExclusao('' + r.id + '')">🗑️</button></td>' +
+    '</tr>'
+  ).join('');
+}
+
+function marcarTodos(chk) {
+  document.querySelectorAll('.chk-reg').forEach(c => {
+    c.checked = chk.checked;
+    const tr = document.getElementById('tr-' + c.value);
+    if (tr) tr.classList.toggle('tr-selecionado', chk.checked);
+  });
+  atualizarSelecao();
+}
+
+function atualizarSelecao() {
+  const selecionados = document.querySelectorAll('.chk-reg:checked');
+  const bar = document.getElementById('gestao-lote-bar');
+  const info = document.getElementById('gestao-lote-info');
+  document.querySelectorAll('.chk-reg').forEach(c => {
+    const tr = document.getElementById('tr-' + c.value);
+    if (tr) tr.classList.toggle('tr-selecionado', c.checked);
+  });
+  if (selecionados.length > 0) {
+    bar.style.display = 'flex';
+    info.textContent = selecionados.length + ' registro(s) selecionado(s)';
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function desmarcarTodos() {
+  document.querySelectorAll('.chk-reg').forEach(c => { c.checked = false; });
+  document.getElementById('chk-todos').checked = false;
+  atualizarSelecao();
+}
+
+// Modal exclusão individual
+function abrirModalExclusao(id) {
+  _exclId = id;
+  const r = registros.find(x => x.id == id);
+  if (!r) return;
+  document.getElementById('modal-excl-info').innerHTML =
+    '<strong>' + r.nome + '</strong> · ' + (r.tipo==='terceiro'?r.cpf:r.matricula) + '<br>' +
+    r.aparelho + ' · Série: <strong>' + r.serie + '</strong><br>' +
+    'Data: ' + r.data + ' · Turno: ' + r.turno + ' · Retirada: ' + r.retirada +
+    (devolvido(r) ? ' · Devolução: ' + r.devolucao : ' · <span style="color:#dc3545;font-weight:600">SEM DEVOLUÇÃO</span>');
+  document.getElementById('modal-excl-confirmacao').value = '';
+  document.getElementById('btn-confirmar-excl').disabled = true;
+  document.getElementById('btn-confirmar-excl').style.opacity = '0.5';
+  document.getElementById('btn-confirmar-excl').style.cursor = 'not-allowed';
+  document.getElementById('modal-bg-exclusao').classList.add('open');
+}
+
+function fecharModalExclusao() {
+  document.getElementById('modal-bg-exclusao').classList.remove('open');
+  _exclId = null;
+}
+
+function checarConfirmacaoExclusao() {
+  const ok = document.getElementById('modal-excl-confirmacao').value.trim().toUpperCase() === 'CONFIRMAR';
+  const btn = document.getElementById('btn-confirmar-excl');
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '0.5';
+  btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+}
+
+async function confirmarExclusao() {
+  if (!_exclId) return;
+  registros = registros.filter(r => r.id != _exclId);
+  localStorage.setItem('coletores_registros', JSON.stringify(registros));
+  await post({acao:'excluirRegistro', id:_exclId});
+  fecharModalExclusao();
+  renderizar();
+  carregarGestao();
+  toast('Registro excluído.', '#dc3545');
+}
+
+// Exclusão em lote (selecionados)
+async function excluirSelecionados() {
+  const ids = Array.from(document.querySelectorAll('.chk-reg:checked')).map(c => c.value);
+  if (!ids.length) { toast('Selecione ao menos um registro.', '#e67e22'); return; }
+  if (!confirm('Excluir ' + ids.length + ' registro(s) selecionado(s)? Esta ação é permanente.')) return;
+  registros = registros.filter(r => !ids.includes(String(r.id)));
+  localStorage.setItem('coletores_registros', JSON.stringify(registros));
+  for (const id of ids) await post({acao:'excluirRegistro', id});
+  renderizar();
+  carregarGestao();
+  toast(ids.length + ' registro(s) excluído(s).', '#dc3545');
+}
+
+// Apagar tudo
+function confirmarLimparTudo() {
+  const txt = prompt('⚠️ ATENÇÃO: Isso apagará TODOS os ' + registros.length + ' registros permanentemente.\nDigite APAGAR TUDO para confirmar:');
+  if (txt && txt.trim().toUpperCase() === 'APAGAR TUDO') {
+    registros = [];
+    localStorage.setItem('coletores_registros', JSON.stringify(registros));
+    post({acao:'limparTudo'});
+    renderizar(); carregarGestao();
+    toast('Todos os registros foram apagados.', '#dc3545');
+  }
+}
+
+// Apagar por data
+function confirmarLimparData() {
+  const data = prompt('Digite a data para apagar (dd/mm/aaaa):');
+  if (!data) return;
+  const dataNorm = data.trim();
+  const antes = registros.length;
+  registros = registros.filter(r => r.data !== dataNorm);
+  const removidos = antes - registros.length;
+  if (removidos === 0) { toast('Nenhum registro encontrado para ' + dataNorm, '#e67e22'); return; }
+  localStorage.setItem('coletores_registros', JSON.stringify(registros));
+  post({acao:'limparData', data:dataNorm});
+  renderizar(); carregarGestao();
+  toast(removidos + ' registro(s) de ' + dataNorm + ' excluídos.', '#dc3545');
+}
+
 </script>
 </body>
 </html>
