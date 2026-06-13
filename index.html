@@ -293,6 +293,10 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
               <input type="text" id="inp-serie-terc" placeholder="Ex: COL-001">
             </div>
           </div>
+          <div class="form-group" style="margin-top:10px;">
+            <label>Ocorrência / Observação</label>
+            <input type="text" id="inp-ocorrencia-terc" placeholder="Ex: aparelho avariado, tela trincada... (opcional)">
+          </div>
         </div>
 
         <div style="margin-top:14px;">
@@ -307,7 +311,7 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
             <thead><tr>
               <th>Tipo</th><th>Matrícula / CPF</th><th>Nome</th><th>Empresa</th>
               <th>Turno</th><th>Aparelho</th><th>Nº Série</th>
-              <th>Retirada</th><th>Devolução</th><th>Status</th><th>Ação</th>
+              <th>Retirada</th><th>Devolução</th><th>Status</th><th>Ocorrência</th><th>Ação</th>
             </tr></thead>
             <tbody id="tbody-registros"><tr><td colspan="11" class="empty">Nenhum registro ainda</td></tr></tbody>
           </table>
@@ -373,7 +377,7 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
             <thead><tr>
               <th>Data</th><th>Tipo</th><th>Turno</th><th>Matrícula / CPF</th>
               <th>Nome</th><th>Empresa</th><th>Aparelho</th><th>Nº Série</th>
-              <th>Retirada</th><th>Devolução</th><th>Status</th>
+              <th>Retirada</th><th>Devolução</th><th>Status</th><th>Ocorrência</th>
             </tr></thead>
             <tbody id="tbody-historico"><tr><td colspan="11" class="empty">Use os filtros acima</td></tr></tbody>
           </table>
@@ -448,6 +452,26 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
     <div class="modal-btns">
       <button class="btn-primary" style="background:#6c757d;" onclick="fecharModalTerceiro()">Cancelar</button>
       <button class="btn-primary" onclick="salvarTerceiro()">Salvar Terceiro</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DEVOLUÇÃO COM OCORRÊNCIA -->
+<div class="modal-bg" id="modal-bg-devolucao">
+  <div class="modal">
+    <h3>📥 Registrar Devolução</h3>
+    <div id="modal-dev-info" style="background:#f8f9fa;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:0.85rem;color:#555;"></div>
+    <div class="form-group" style="margin-bottom:14px;">
+      <label>Hora da Devolução</label>
+      <input type="time" id="modal-dev-hora">
+    </div>
+    <div class="form-group">
+      <label>Ocorrência / Observação <span style="color:#aaa;font-weight:400">(opcional)</span></label>
+      <input type="text" id="modal-dev-ocorrencia" placeholder="Ex: aparelho avariado, bateria vazia, tela trincada...">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary" style="background:#6c757d;" onclick="fecharModalDev()">Cancelar</button>
+      <button class="btn-success" onclick="confirmarDevolucao()">✅ Confirmar Devolução</button>
     </div>
   </div>
 </div>
@@ -708,10 +732,15 @@ async function registrarRetirada() {
   }
   if (registros.find(r => r.serie===serie && !r.devolucao)) { alert('Coletor '+serie+' já está em uso!'); return; }
 
+  const ocorrencia = tipoAtual==='interno'
+    ? document.getElementById('inp-ocorrencia').value.trim()
+    : document.getElementById('inp-ocorrencia-terc').value.trim();
+
   const reg = {
     id:Date.now(), data:new Date().toLocaleDateString('pt-BR'),
     tipo:tipoAtual, matricula:mat, cpf, nome, empresa,
-    turno, aparelho, serie, retirada:agora(), devolucao:null, operador:sessao.nome
+    turno, aparelho, serie, retirada:agora(), devolucao:null,
+    ocorrencia, ocorrenciaDev:'', operador:sessao.nome
   };
   registros.push(reg);
   localStorage.setItem('coletores_registros', JSON.stringify(registros));
@@ -721,12 +750,38 @@ async function registrarRetirada() {
 }
 
 // ─── DEVOLUÇÃO / EXCLUIR ─────────────────────────────────────────────────────
-async function registrarDevolucao(id) {
+let _devId = null;
+
+function registrarDevolucao(id) {
+  _devId = id;
   const reg = registros.find(r => r.id===id); if (!reg) return;
-  reg.devolucao = agora();
+  const info = document.getElementById('modal-dev-info');
+  info.innerHTML = '<strong>' + reg.nome + '</strong><br>' +
+    reg.aparelho + ' · Série: <strong>' + reg.serie + '</strong> · Retirada às ' + reg.retirada;
+  // Hora atual
+  const agr = agora();
+  document.getElementById('modal-dev-hora').value = agr;
+  document.getElementById('modal-dev-ocorrencia').value = '';
+  document.getElementById('modal-bg-devolucao').classList.add('open');
+}
+
+function fecharModalDev() {
+  document.getElementById('modal-bg-devolucao').classList.remove('open');
+  _devId = null;
+}
+
+async function confirmarDevolucao() {
+  if (!_devId) return;
+  const reg = registros.find(r => r.id===_devId); if (!reg) return;
+  const hora = document.getElementById('modal-dev-hora').value;
+  const ocorr = document.getElementById('modal-dev-ocorrencia').value.trim();
+  if (!hora) { alert('Informe a hora da devolução.'); return; }
+  reg.devolucao = hora;
+  reg.ocorrenciaDev = ocorr;
   localStorage.setItem('coletores_registros', JSON.stringify(registros));
+  fecharModalDev();
   renderizar();
-  await post({acao:'registrarDevolucao', id:reg.id, serie:reg.serie, devolucao:reg.devolucao});
+  await post({acao:'registrarDevolucao', id:reg.id, serie:reg.serie, devolucao:hora, ocorrenciaDev:ocorr});
   toast('✅ Devolução registrada!', '#28a745');
 }
 
@@ -744,7 +799,7 @@ function renderizar() {
   const regs  = registros.filter(r => r.data===hoje);
 
   if (!regs.length) {
-    tbody.innerHTML = '<tr><td colspan="11" class="empty">Nenhum registro ainda</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro ainda</td></tr>';
   } else {
     tbody.innerHTML = regs.slice().reverse().map(r =>
       '<tr>' +
@@ -757,20 +812,21 @@ function renderizar() {
       '<td><strong>' + r.serie + '</strong></td>' +
       '<td>' + r.retirada + '</td>' +
       '<td>' + (r.devolucao||'—') + '</td>' +
-      '<td><span class="badge ' + (r.devolucao ? 'badge-devolvido':'badge-pendente') + '">' + (r.devolucao?'Devolvido':'Pendente') + '</span></td>' +
+      '<td><span class="badge ' + (devolvido(r)?'badge-devolvido':'badge-pendente') + '">' + (devolvido(r)?'Devolvido':'Pendente') + '</span></td>' +
+      '<td style="max-width:160px;white-space:normal;font-size:0.8rem;color:#c0392b">' + (r.ocorrenciaDev || r.ocorrencia || '') + '</td>' +
       '<td style="display:flex;gap:6px;">' +
-      (!r.devolucao ? '<button class="btn-success btn-sm" onclick="registrarDevolucao('+r.id+')">Devolver</button>' : '') +
+      (!devolvido(r) ? '<button class="btn-success btn-sm" onclick="registrarDevolucao('+r.id+')">Devolver</button>' : '') +
       '<button class="btn-danger btn-sm" onclick="excluir('+r.id+')">✕</button>' +
       '</td></tr>'
     ).join('');
   }
 
-  const devolvidos = regs.filter(r => r.devolucao).length;
+  const devolvidos = regs.filter(r => devolvido(r)).length;
   document.getElementById('stat-total').textContent      = regs.length;
   document.getElementById('stat-devolvidos').textContent = devolvidos;
   document.getElementById('stat-pendentes').textContent  = regs.length - devolvidos;
 
-  const pends = regs.filter(r => !r.devolucao);
+  const pends = regs.filter(r => !devolvido(r));
   document.getElementById('pendencias-list').innerHTML = !pends.length
     ? '<div class="empty">Nenhuma pendência ✅</div>'
     : pends.map(r => {
@@ -891,18 +947,18 @@ async function buscarHistorico() {
   const tipo  = document.getElementById('hist-tipo').value;
   const tbody = document.getElementById('tbody-historico');
   if (!data) { alert('Selecione uma data.'); return; }
-  tbody.innerHTML = '<tr><td colspan="11" class="empty">Carregando...</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="12" class="empty">Carregando...</td></tr>';
   try {
     const json = await jsonp({acao:'historico', data:data.split('-').reverse().join('/'), turno, tipo});
     if (!json) throw new Error('sem resposta');
     dadosHistorico = json.registros || [];
     renderHistorico(dadosHistorico);
-  } catch { tbody.innerHTML = '<tr><td colspan="11" class="empty">Erro ao buscar</td></tr>'; }
+  } catch { tbody.innerHTML = '<tr><td colspan="12" class="empty">Erro ao buscar</td></tr>'; }
 }
 
 function renderHistorico(lista) {
   const tbody = document.getElementById('tbody-historico');
-  if (!lista.length) { tbody.innerHTML = '<tr><td colspan="11" class="empty">Nenhum registro</td></tr>'; return; }
+  if (!lista.length) { tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro</td></tr>'; return; }
   tbody.innerHTML = lista.map(r =>
     '<tr>' +
     '<td>' + r.data + '</td>' +
@@ -915,22 +971,23 @@ function renderHistorico(lista) {
     '<td><strong>' + r.serie + '</strong></td>' +
     '<td>' + r.retirada + '</td>' +
     '<td>' + (r.devolucao||'—') + '</td>' +
-    '<td><span class="badge ' + (r.devolucao?'badge-devolvido':'badge-pendente') + '">' + (r.devolucao?'Devolvido':'Pendente') + '</span></td>' +
+    '<td><span class="badge ' + (devolvido(r)?'badge-devolvido':'badge-pendente') + '">' + (devolvido(r)?'Devolvido':'Pendente') + '</span></td>' +
+    '<td style="max-width:180px;white-space:normal;font-size:0.8rem;color:#c0392b">' + (r.ocorrenciaDev||r.ocorrencia||'') + '</td>' +
     '</tr>'
   ).join('');
 }
 
 function exportarExcel() {
   if (!dadosHistorico.length) { toast('Carregue o histórico primeiro.', '#dc3545'); return; }
-  const linhas = [['Data','Tipo','Turno','Matrícula / CPF','Nome','Empresa','Aparelho','Nº Série','Retirada','Devolução','Status']];
+  const linhas = [['Data','Tipo','Turno','Matrícula / CPF','Nome','Empresa','Aparelho','Nº Série','Retirada','Devolução','Status','Ocorrência']];
   dadosHistorico.forEach(r => linhas.push([
     r.data, r.tipo==='terceiro'?'Terceiro':'Interno', r.turno,
     r.tipo==='terceiro'?r.cpf:r.matricula, r.nome, r.empresa||'',
-    r.aparelho, r.serie, r.retirada, r.devolucao||'', r.devolucao?'Devolvido':'Pendente'
+    r.aparelho, r.serie, r.retirada, r.devolucao||'', devolvido(r)?'Devolvido':'Pendente', r.ocorrenciaDev||r.ocorrencia||''
   ]));
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(linhas);
-  ws['!cols'] = [12,10,8,16,28,20,18,14,10,10,12].map(w=>({wch:w}));
+  ws['!cols'] = [12,10,8,16,28,20,18,14,10,10,12,24].map(w=>({wch:w}));
   XLSX.utils.book_append_sheet(wb, ws, 'Histórico');
   XLSX.writeFile(wb, 'Coletores_CD107_' + new Date().toISOString().split('T')[0] + '.xlsx');
   toast('✅ Excel exportado!', '#28a745');
@@ -1016,6 +1073,7 @@ async function testarUrl() {
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
 function agora() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function devolvido(r) { return r.devolucao && r.devolucao !== ''; }
 
 function toast(msg, cor='#1a3a5c') {
   const t = document.getElementById('toast');
@@ -1056,11 +1114,13 @@ function limparForm() {
   ['inp-matricula','inp-nome','inp-aparelho','inp-serie'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('inp-nome').readOnly=true;
   document.getElementById('msg-matricula').textContent='';
+  document.getElementById('inp-ocorrencia').value='';
   document.getElementById('inp-cpf-busca').value='';
   document.getElementById('inp-nome-terc').value='';
   document.getElementById('inp-empresa-terc').value='';
   document.getElementById('inp-aparelho-terc').value='';
   document.getElementById('inp-serie-terc').value='';
+  document.getElementById('inp-ocorrencia-terc').value='';
   document.getElementById('msg-cpf').textContent='';
   terceiroBuscado=null;
 }
