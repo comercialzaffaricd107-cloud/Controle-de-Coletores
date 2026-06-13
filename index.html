@@ -148,6 +148,14 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
   .form-grid-4 { grid-template-columns: 1fr 1fr; }
   .stats { grid-template-columns: 1fr; }
 }
+
+.login-url-box { margin-top: 18px; padding-top: 16px; border-top: 1px solid #eee; text-align: left; }
+.login-url-box label { font-size: 0.72rem; font-weight: 600; color: #aaa; text-transform: uppercase; display: block; margin-bottom: 5px; }
+.login-url-box input { width: 100%; border: 1.5px solid #eee; border-radius: 7px; padding: 8px 12px; font-size: 0.82rem; color: #555; transition: border 0.2s; }
+.login-url-box input:focus { outline: none; border-color: #2d6a9f; }
+.btn-url-salvar { width: 100%; background: #f0f4ff; color: #2d6a9f; border: 1.5px solid #c0d0f0; border-radius: 7px; padding: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
+.btn-url-salvar:hover { background: #dde8ff; }
+#login-url-status { font-size: 0.75rem; min-height: 14px; margin-top: 4px; text-align: center; }
 </style>
 </head>
 <body>
@@ -168,6 +176,13 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
     </div>
     <div id="login-erro"></div>
     <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+
+    <div class="login-url-box">
+      <label>🔗 URL do Apps Script</label>
+      <input type="text" id="login-url-input" placeholder="https://script.google.com/macros/s/..." autocomplete="off">
+      <button class="btn-url-salvar" onclick="salvarUrlLogin()">Salvar URL do sistema</button>
+      <div id="login-url-status"></div>
+    </div>
   </div>
 </div>
 
@@ -480,7 +495,9 @@ const SESSAO_MS   = 10 * 60 * 60 * 1000;
 
 // ─── INIT ────────────────────────────────────────────────────────────────────
 window.onload = () => {
-  document.getElementById('inp-script-url').value = localStorage.getItem('coletores_script_url') || '';
+  const _urlSalva = localStorage.getItem('coletores_script_url') || '';
+  document.getElementById('inp-script-url').value = _urlSalva;
+  document.getElementById('login-url-input').value = _urlSalva;
   document.getElementById('hist-data').value = new Date().toISOString().split('T')[0];
   verificarSessao();
   setInterval(atualizarRelogio, 1000);
@@ -988,6 +1005,7 @@ async function desativarUsuario(id, nome) {
 function salvarUrl() {
   const url = document.getElementById('inp-script-url').value.trim();
   localStorage.setItem('coletores_script_url', url);
+  document.getElementById('login-url-input').value = url;
   document.getElementById('url-status').innerHTML = '<span style="color:#28a745">✅ URL salva!</span>';
 }
 
@@ -1032,6 +1050,15 @@ function limparForm() {
   document.getElementById('inp-serie-terc').value='';
   document.getElementById('msg-cpf').textContent='';
   terceiroBuscado=null;
+}
+
+function salvarUrlLogin() {
+  const url = document.getElementById('login-url-input').value.trim();
+  const st  = document.getElementById('login-url-status');
+  if (!url) { st.innerHTML = '<span style="color:#dc3545">Cole a URL antes de salvar.</span>'; return; }
+  localStorage.setItem('coletores_script_url', url);
+  document.getElementById('inp-script-url').value = url;
+  st.innerHTML = '<span style="color:#28a745">✅ URL salva! Faça login.</span>';
 }
 </script>
 </body>
