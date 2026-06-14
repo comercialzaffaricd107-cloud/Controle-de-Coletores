@@ -337,7 +337,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
               <th>Turno</th><th>Aparelho</th><th>Nº Série</th>
               <th>Retirada</th><th>Devolução</th><th>Status</th><th>Ocorrência</th><th>Ação</th>
             </tr></thead>
-            <tbody id="tbody-registros"><tr><td colspan="11" class="empty">Nenhum registro ainda</td></tr></tbody>
+            <tbody id="tbody-registros"><tr><td colspan="12" class="empty">Nenhum registro ainda</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -469,7 +469,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
               <th>Nome</th><th>Empresa</th><th>Aparelho</th><th>Nº Série</th>
               <th>Retirada</th><th>Devolução</th><th>Status</th><th>Ocorrência</th><th id="th-acao-hist"></th>
             </tr></thead>
-            <tbody id="tbody-historico"><tr><td colspan="11" class="empty">Use os filtros acima</td></tr></tbody>
+            <tbody id="tbody-historico"><tr><td colspan="13" class="empty">Use os filtros acima</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -625,10 +625,15 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
     <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:0.82rem;color:#856404;">
       ⚠️ Esta ação é permanente e não pode ser desfeita. O registro será removido do sistema e do Google Sheets.
     </div>
+    <div class="form-group" style="margin-bottom:10px;">
+      <label>Motivo da exclusão <span style="color:#dc3545">*</span></label>
+      <input type="text" id="modal-excl-motivo" placeholder="Informe o motivo da exclusão" oninput="checarConfirmacaoExclusao()">
+    </div>
     <div class="form-group" style="margin-bottom:0">
       <label>Digite <strong>CONFIRMAR</strong> para prosseguir</label>
       <input type="text" id="modal-excl-confirmacao" placeholder="CONFIRMAR" oninput="checarConfirmacaoExclusao()">
     </div>
+    <div id="modal-excl-erro" style="color:#dc3545;font-size:0.8rem;min-height:16px;margin-top:4px;"></div>
     <div class="modal-btns">
       <button class="btn-primary" style="background:#6c757d;" onclick="fecharModalExclusao()">Cancelar</button>
       <button class="btn-danger" id="btn-confirmar-excl" disabled onclick="confirmarExclusao()" style="opacity:0.5;cursor:not-allowed;">🗑️ Excluir Definitivamente</button>
@@ -738,26 +743,6 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 </div>
 
 <div id="toast"></div>
-
-<!-- MODAL EXCLUSÃO -->
-<div class="modal-bg" id="modal-bg-exclusao">
-  <div class="modal" style="border-top: 4px solid #dc3545;">
-    <h3 style="color:#dc3545;">🗑 Excluir Registro</h3>
-    <div id="modal-excl-info" style="background:#fff5f5;border:1px solid #f5c6cb;border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:0.85rem;color:#555;line-height:1.6;"></div>
-    <div style="background:#fff3cd;border-radius:6px;padding:10px 14px;font-size:0.82rem;color:#856404;margin-bottom:16px;">
-      ⚠️ Esta ação é permanente e não pode ser desfeita.
-    </div>
-    <div class="form-group" style="margin-bottom:4px;">
-      <label>Motivo da exclusão <span style="color:#dc3545">*</span></label>
-      <input type="text" id="modal-excl-motivo" placeholder="Informe o motivo (obrigatório)">
-    </div>
-    <div id="modal-excl-erro" style="color:#dc3545;font-size:0.8rem;min-height:16px;margin-top:4px;"></div>
-    <div class="modal-btns">
-      <button class="btn-primary" style="background:#6c757d;" onclick="fecharModalExclusao()">Cancelar</button>
-      <button class="btn-danger" onclick="confirmarExclusao()">🗑 Confirmar Exclusão</button>
-    </div>
-  </div>
-</div>
 
 <script>
 // ─── ESTADO GLOBAL ──────────────────────────────────────────────────────────
@@ -942,6 +927,7 @@ function montarAbas() {
     { id:'terceiros', label:'🤝 Terceiros',       perfis:['Operador','Supervisor'] },
     { id:'aparelhos', label:'📱 Aparelhos',       perfis:['Operador','Supervisor'] },
     { id:'historico', label:'🗂️ Histórico',      perfis:['Supervisor'] },
+    { id:'auditoria', label:'🔍 Auditoria',       perfis:['Supervisor'] },
     { id:'usuarios',  label:'👥 Usuários',        perfis:['Supervisor'] },
     { id:'gestao',    label:'🗑️ Gestão de Dados', perfis:['Supervisor'] },
     { id:'config',    label:'⚙️ Configuração',   perfis:['Supervisor'] },
@@ -1989,6 +1975,99 @@ function confirmarLimparData() {
   toast(removidos + ' registro(s) de ' + dataNorm + ' excluídos.', '#dc3545');
 }
 
+
+
+// ─── CORREÇÃO FINAL: modal único de exclusão + auditoria ────────────────────
+function _prepararModalExclusao(id, origem) {
+  if (!sessao || (sessao.perfil !== 'Supervisor' && sessao.perfil !== 'Administrador')) {
+    toast('Sem permissão para excluir registros.', '#dc3545');
+    return false;
+  }
+  _exclId = id;
+  _exclOrigem = origem || 'gestao';
+  const r = registros.find(x => String(x.id) === String(id));
+  if (!r) { toast('Registro não encontrado.', '#dc3545'); return false; }
+
+  document.getElementById('modal-excl-info').innerHTML =
+    '<strong>' + r.nome + '</strong> · ' + (r.tipo === 'terceiro' ? r.cpf : r.matricula) + '<br>' +
+    r.aparelho + ' · Série: <strong>' + r.serie + '</strong><br>' +
+    'Data: ' + r.data + ' · Turno: ' + r.turno + ' · Retirada: ' + r.retirada +
+    (devolvido(r) ? ' · Devolução: ' + r.devolucao : ' · <span style="color:#dc3545;font-weight:600">PENDENTE</span>');
+
+  document.getElementById('modal-excl-motivo').value = '';
+  document.getElementById('modal-excl-confirmacao').value = '';
+  document.getElementById('modal-excl-erro').textContent = '';
+  checarConfirmacaoExclusao();
+  document.getElementById('modal-bg-exclusao').classList.add('open');
+  return true;
+}
+
+function excluir(id, origem) {
+  _prepararModalExclusao(id, origem || 'turno');
+}
+
+function abrirModalExclusao(idOuEl) {
+  const id = (idOuEl && idOuEl.dataset) ? idOuEl.dataset.id : idOuEl;
+  _prepararModalExclusao(id, 'gestao');
+}
+
+function fecharModalExclusao() {
+  const modal = document.getElementById('modal-bg-exclusao');
+  if (modal) modal.classList.remove('open');
+  _exclId = null;
+  _exclOrigem = null;
+}
+
+function checarConfirmacaoExclusao() {
+  const campoConf = document.getElementById('modal-excl-confirmacao');
+  const campoMotivo = document.getElementById('modal-excl-motivo');
+  const btn = document.getElementById('btn-confirmar-excl');
+  if (!campoConf || !campoMotivo || !btn) return;
+  const ok = campoConf.value.trim().toUpperCase() === 'CONFIRMAR' && campoMotivo.value.trim().length >= 3;
+  btn.disabled = !ok;
+  btn.style.opacity = ok ? '1' : '0.5';
+  btn.style.cursor  = ok ? 'pointer' : 'not-allowed';
+}
+
+async function confirmarExclusao() {
+  if (!_exclId) return;
+  const motivo = document.getElementById('modal-excl-motivo').value.trim();
+  const confirmacao = document.getElementById('modal-excl-confirmacao').value.trim().toUpperCase();
+  const erro = document.getElementById('modal-excl-erro');
+  if (!motivo || confirmacao !== 'CONFIRMAR') {
+    erro.textContent = 'Informe o motivo e digite CONFIRMAR.';
+    return;
+  }
+
+  const reg = registros.find(r => String(r.id) === String(_exclId));
+  const log = {
+    acao: 'exclusao',
+    idRegistro: _exclId,
+    motivo,
+    operador: sessao ? sessao.nome : '',
+    perfil: sessao ? sessao.perfil : '',
+    timestamp: new Date().toLocaleString('pt-BR'),
+    nomeExcluido: reg ? reg.nome : '',
+    serie: reg ? reg.serie : '',
+    dadosExcluidos: reg ? JSON.stringify(reg) : ''
+  };
+  const auditoria = JSON.parse(localStorage.getItem('coletores_auditoria') || '[]');
+  auditoria.push(log);
+  localStorage.setItem('coletores_auditoria', JSON.stringify(auditoria));
+
+  registros = registros.filter(r => String(r.id) !== String(_exclId));
+  localStorage.setItem('coletores_registros', JSON.stringify(registros));
+
+  const idExcluido = _exclId;
+  const origem = _exclOrigem;
+  fecharModalExclusao();
+  renderizar();
+  if (origem === 'gestao' && typeof carregarGestao === 'function') carregarGestao();
+  if (origem === 'historico' && typeof buscarHistorico === 'function') buscarHistorico();
+  if (typeof renderAuditoria === 'function') renderAuditoria();
+  await post({acao:'excluirRegistro', id:idExcluido, motivo, operador:sessao ? sessao.nome : ''});
+  toast('Registro excluído e auditado.', '#dc3545');
+}
 </script>
 </body>
 </html>
