@@ -156,6 +156,7 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .btn-url-salvar { width: 100%; background: #f0f4ff; color: #2d6a9f; border: 1.5px solid #c0d0f0; border-radius: 7px; padding: 8px; font-size: 0.82rem; font-weight: 600; cursor: pointer; margin-top: 6px; transition: background 0.2s; }
 .btn-url-salvar:hover { background: #dde8ff; }
 #login-url-status { font-size: 0.75rem; min-height: 14px; margin-top: 4px; text-align: center; }
+#url-configurada-box { display: none; }
 
 /* GESTÃO */
 .tr-selecionado { background: #fff3cd !important; }
@@ -184,8 +185,14 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 
     <div class="login-url-box">
       <label>🔗 URL do Apps Script</label>
-      <input type="text" id="login-url-input" placeholder="https://script.google.com/macros/s/..." autocomplete="off">
-      <button class="btn-url-salvar" onclick="salvarUrlLogin()">Salvar URL do sistema</button>
+      <div id="url-configurada-box" style="display:none;background:#d4edda;border:1px solid #28a745;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:0.8rem;color:#155724;display:flex;justify-content:space-between;align-items:center;">
+        <span>✅ URL configurada</span>
+        <button onclick="alterarUrl()" style="background:none;border:none;color:#155724;font-size:0.78rem;cursor:pointer;text-decoration:underline;">Alterar</button>
+      </div>
+      <div id="url-input-box">
+        <input type="text" id="login-url-input" placeholder="https://script.google.com/macros/s/..." autocomplete="off">
+        <button class="btn-url-salvar" onclick="salvarUrlLogin()">Salvar URL do sistema</button>
+      </div>
       <div id="login-url-status"></div>
     </div>
   </div>
@@ -673,10 +680,15 @@ window.onload = () => {
   if (_elScriptUrl) _elScriptUrl.value = _urlSalva;
   const _elLoginUrl = document.getElementById('login-url-input');
   if (_elLoginUrl) _elLoginUrl.value = _urlSalva;
-  // Mostrar feedback de URL já configurada
-  const _stLogin = document.getElementById('login-url-status');
-  if (_stLogin && _urlSalva) {
-    _stLogin.innerHTML = '<span style="color:#28a745;font-size:0.75rem">✅ URL já configurada — pode fazer login direto.</span>';
+  // Mostrar box de URL configurada ou campo de input
+  const _urlBox    = document.getElementById('url-configurada-box');
+  const _urlInput  = document.getElementById('url-input-box');
+  if (_urlSalva) {
+    if (_urlBox)   { _urlBox.style.display   = 'flex'; }
+    if (_urlInput) { _urlInput.style.display = 'none'; }
+  } else {
+    if (_urlBox)   { _urlBox.style.display   = 'none'; }
+    if (_urlInput) { _urlInput.style.display = 'block'; }
   }
   document.getElementById('hist-data').value = new Date().toISOString().split('T')[0];
   atualizarBannerColaboradores();
@@ -1462,6 +1474,15 @@ function limparForm() {
   terceiroBuscado=null;
 }
 
+function alterarUrl() {
+  const _urlBox   = document.getElementById('url-configurada-box');
+  const _urlInput = document.getElementById('url-input-box');
+  const _elLogin  = document.getElementById('login-url-input');
+  if (_urlBox)   _urlBox.style.display   = 'none';
+  if (_urlInput) _urlInput.style.display = 'block';
+  if (_elLogin)  { _elLogin.value = localStorage.getItem('coletores_script_url') || ''; _elLogin.focus(); }
+}
+
 function salvarUrlLogin() {
   const url = document.getElementById('login-url-input').value.trim();
   const st  = document.getElementById('login-url-status');
@@ -1470,8 +1491,14 @@ function salvarUrlLogin() {
   const elConfig = document.getElementById('inp-script-url');
   if (elConfig) elConfig.value = url;
   st.innerHTML = '<span style="color:#28a745">✅ URL salva! Faça login.</span>';
-  // Confirmar visualmente que ficou salva
-  setTimeout(() => { st.innerHTML = '<span style="color:#28a745">✅ URL salva permanentemente neste navegador.</span>'; }, 1500);
+  // Mostrar box de URL configurada
+  setTimeout(() => {
+    const _urlBox   = document.getElementById('url-configurada-box');
+    const _urlInput = document.getElementById('url-input-box');
+    if (_urlBox)   _urlBox.style.display   = 'flex';
+    if (_urlInput) _urlInput.style.display = 'none';
+    st.innerHTML = '';
+  }, 1200);
 }
 
 // ─── GESTÃO DE DADOS ─────────────────────────────────────────────────────────
