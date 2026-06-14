@@ -1205,21 +1205,34 @@ function renderAparelhos(lista) {
   if (!todos.length) {
     tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum aparelho encontrado</td></tr>'; return;
   }
-  tbody.innerHTML = todos.map(a => {
-    const retorno = a.retorno ? ' · Retorno: ' + a.retorno.split('-').reverse().join('/') : '';
-    return '<tr>' +
-      '<td><strong>' + a.nome + '</strong></td>' +
-      '<td style="font-family:monospace">' + a.serie + '</td>' +
-      '<td>' + (a.patrim || '—') + '</td>' +
-      '<td>' + (a.setor  || '—') + '</td>' +
-      '<td><span class="badge ' + statusBadgeAp(a.status) + '">' + a.status + '</span>' + retorno + '</td>' +
-      '<td style="max-width:180px;white-space:normal;font-size:0.82rem;color:#666">' + (a.obs || '') + '</td>' +
-      '<td style="display:flex;gap:6px;flex-wrap:wrap;">' +
-        '<button class="btn-warn btn-sm" onclick='abrirModalAparelho(' + JSON.stringify(a).replace(/'/g,"&#39;") + ')'>Editar</button>' +
-        (a.status === 'Defeito' || a.status === 'Manutenção'
-          ? '<button class="btn-success btn-sm" onclick="marcarOk('' + a.id + '')">✔ OK</button>' : '') +
-      '</td></tr>';
+  tbody.innerHTML = todos.map((a,idx) => {
+    const retorno = a.retorno ? ' &middot; Retorno: ' + a.retorno.split('-').reverse().join('/') : '';
+    const badgeCl = statusBadgeAp(a.status);
+    const emReparo = a.status === 'Defeito' || a.status === 'Manuten\u00e7\u00e3o';
+    return [
+      '<tr>',
+      '<td><strong>' + a.nome + '</strong></td>',
+      '<td style="font-family:monospace">' + a.serie + '</td>',
+      '<td>' + (a.patrim || '&mdash;') + '</td>',
+      '<td>' + (a.setor  || '&mdash;') + '</td>',
+      '<td><span class="badge ' + badgeCl + '">' + a.status + '</span>' + retorno + '</td>',
+      '<td style="max-width:180px;white-space:normal;font-size:0.82rem;color:#666">' + (a.obs || '') + '</td>',
+      '<td style="display:flex;gap:6px;flex-wrap:wrap;">',
+        '<button class="btn-warn btn-sm" data-ap-id="' + a.id + '" data-ap-action="editar">Editar</button>',
+        emReparo ? '<button class="btn-success btn-sm" data-ap-id="' + a.id + '" data-ap-action="ok">&#10004; OK</button>' : '',
+      '</td>',
+      '</tr>'
+    ].join('');
   }).join('');
+  // Delegação de eventos para botões de aparelhos
+  tbody.onclick = function(ev) {
+    const btn = ev.target.closest('[data-ap-id]');
+    if (!btn) return;
+    const id  = btn.dataset.apId;
+    const act = btn.dataset.apAction;
+    if (act === 'editar') editarAparelho(id);
+    if (act === 'ok')     marcarOk(id);
+  };
 }
 
 function filtrarAparelhos() {
@@ -1231,6 +1244,11 @@ function filtrarAparelhos() {
     (!st || a.status === st)
   );
   renderAparelhos(lista);
+}
+
+function editarAparelho(id) {
+  const a = aparelhos.find(x => String(x.id) === String(id));
+  if (a) abrirModalAparelho(a);
 }
 
 function abrirModalAparelho(a) {
