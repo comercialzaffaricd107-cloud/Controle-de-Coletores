@@ -815,24 +815,100 @@ function verificarSessao() {
   }
 }
 
+// Usuários locais: [{usuario, senhaHash, nome, perfil}]
+// Populado pelo admin ou ao autenticar via Sheets com sucesso
+function hashSimples(str) {
+  // Hash simples para uso local (não criptográfico)
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h) + str.charCodeAt(i);
+    h |= 0;
+  }
+  return String(h);
+}
+
+function getUsuariosLocais() {
+  const base = localStorage.getItem('coletores_usuarios_locais');
+  if (base) return JSON.parse(base);
+  // Usuário admin padrão sempre disponível
+  return [{ usuario:'admin', senhaHash: hashSimples('admin123'), nome:'Administrador', perfil:'Supervisor' }];
+}
+
+function salvarUsuariosLocais(lista) {
+  localStorage.setItem('coletores_usuarios_locais', JSON.stringify(lista));
+}
+
 async function fazerLogin() {
-  const usuario = document.getElementById('login-usuario').value.trim();
+  const usuario = document.getElementById('login-usuario').value.trim().toLowerCase();
   const senha   = document.getElementById('login-senha').value.trim();
   const erro    = document.getElementById('login-erro');
   erro.textContent = '';
   if (!usuario || !senha) { erro.textContent = 'Preencha usuário e senha.'; return; }
-  const url = localStorage.getItem('coletores_script_url');
-  if (!url) { erro.textContent = 'URL não configurada. Contate o supervisor.'; return; }
+
   erro.textContent = 'Verificando...';
+
+  // 1. Tentar login local primeiro (sempre funciona, offline)
+  const usuariosLocais = getUsuariosLocais();
+  const userLocal = usuariosLocais.find(u =>
+    u.usuario.toLowerCase() === usuario && u.senhaHash === hashSimples(senha)
+  );
+
+  if (userLocal) {
+    sessao = { nome: userLocal.nome, perfil: userLocal.perfil, id: userLocal.usuario, ts: Date.now() };
+    localStorage.setItem('coletores_sessao', JSON.stringify(sessao));
+    entrarApp();
+    // Sincronizar com Sheets em background (sem bloquear)
+    sincronizarUsuarioSheets(usuario, senha);
+    return;
+  }
+
+  // 2. Se não encontrou localmente, tentar via Sheets
+  const url = localStorage.getItem('coletores_script_url');
+  if (!url) {
+    erro.textContent = 'Usuário ou senha inválidos.';
+    return;
+  }
+
+  erro.textContent = 'Conectando ao servidor...';
   try {
-    const data = await jsonp({acao:'login', usuario, senha});
-    if (!data) throw new Error('sem resposta');
-    if (data.ok) {
-      sessao = { nome:data.nome, perfil:data.perfil, id:data.id, ts:Date.now() };
+    const data = await Promise.race([
+      jsonp({ acao:'login', usuario, senha }),
+      new Promise((_,r) => setTimeout(() => r(new Error('timeout')), 8000))
+    ]);
+    if (data && data.ok) {
+      // Salvar usuário localmente para próximos logins
+      const lista = getUsuariosLocais();
+      const idx   = lista.findIndex(u => u.usuario.toLowerCase() === usuario);
+      const novoUser = { usuario, senhaHash: hashSimples(senha), nome: data.nome, perfil: data.perfil };
+      if (idx >= 0) lista[idx] = novoUser; else lista.push(novoUser);
+      salvarUsuariosLocais(lista);
+      sessao = { nome: data.nome, perfil: data.perfil, id: data.id, ts: Date.now() };
       localStorage.setItem('coletores_sessao', JSON.stringify(sessao));
       entrarApp();
-    } else { erro.textContent = data.erro || 'Usuário ou senha inválidos.'; }
-  } catch { erro.textContent = 'Erro de conexão. Verifique a URL do sistema.'; }
+    } else {
+      erro.textContent = (data && data.erro) || 'Usuário ou senha inválidos.';
+    }
+  } catch {
+    erro.textContent = 'Sem conexão com o servidor. Verifique usuário e senha.';
+  }
+}
+
+async function sincronizarUsuarioSheets(usuario, senha) {
+  try {
+    const url = localStorage.getItem('coletores_script_url');
+    if (!url) return;
+    const data = await Promise.race([
+      jsonp({ acao:'login', usuario, senha }),
+      new Promise((_,r) => setTimeout(() => r(new Error('t')), 5000))
+    ]);
+    if (data && data.ok) {
+      const lista = getUsuariosLocais();
+      const idx   = lista.findIndex(u => u.usuario.toLowerCase() === usuario);
+      const novoUser = { usuario, senhaHash: hashSimples(senha), nome: data.nome, perfil: data.perfil };
+      if (idx >= 0) lista[idx] = novoUser; else lista.push(novoUser);
+      salvarUsuariosLocais(lista);
+    }
+  } catch {}
 }
 
 function entrarApp() {
