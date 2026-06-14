@@ -669,8 +669,15 @@ const SESSAO_MS   = 10 * 60 * 60 * 1000;
 // ─── INIT ────────────────────────────────────────────────────────────────────
 window.onload = () => {
   const _urlSalva = localStorage.getItem('coletores_script_url') || '';
-  document.getElementById('inp-script-url').value = _urlSalva;
-  document.getElementById('login-url-input').value = _urlSalva;
+  const _elScriptUrl = document.getElementById('inp-script-url');
+  if (_elScriptUrl) _elScriptUrl.value = _urlSalva;
+  const _elLoginUrl = document.getElementById('login-url-input');
+  if (_elLoginUrl) _elLoginUrl.value = _urlSalva;
+  // Mostrar feedback de URL já configurada
+  const _stLogin = document.getElementById('login-url-status');
+  if (_stLogin && _urlSalva) {
+    _stLogin.innerHTML = '<span style="color:#28a745;font-size:0.75rem">✅ URL já configurada — pode fazer login direto.</span>';
+  }
   document.getElementById('hist-data').value = new Date().toISOString().split('T')[0];
   atualizarBannerColaboradores();
   verificarSessao();
@@ -721,6 +728,10 @@ function entrarApp() {
   document.getElementById('tela-login').style.display = 'none';
   document.getElementById('tela-app').style.display   = 'block';
   document.getElementById('badge-usuario').textContent = sessao.nome + ' · ' + sessao.perfil;
+  // Garantir que campo de URL da Config está preenchido
+  const _urlAtual = localStorage.getItem('coletores_script_url') || '';
+  const _cfgUrl = document.getElementById('inp-script-url');
+  if (_cfgUrl) _cfgUrl.value = _urlAtual;
   montarAbas(); renderizar(); renderTerceiros();
   if (sessao.perfil === 'Supervisor') carregarUsuarios();
   // Mostrar botão limpar planilha só para supervisores
@@ -1299,9 +1310,11 @@ async function desativarUsuario(id, nome) {
 // ─── CONFIG ──────────────────────────────────────────────────────────────────
 function salvarUrl() {
   const url = document.getElementById('inp-script-url').value.trim();
+  if (!url) { document.getElementById('url-status').innerHTML = '<span style="color:#dc3545">Cole a URL antes de salvar.</span>'; return; }
   localStorage.setItem('coletores_script_url', url);
-  document.getElementById('login-url-input').value = url;
-  document.getElementById('url-status').innerHTML = '<span style="color:#28a745">✅ URL salva!</span>';
+  const elLogin = document.getElementById('login-url-input');
+  if (elLogin) elLogin.value = url;
+  document.getElementById('url-status').innerHTML = '<span style="color:#28a745">✅ URL salva com sucesso!</span>';
 }
 
 async function testarUrl() {
@@ -1454,8 +1467,11 @@ function salvarUrlLogin() {
   const st  = document.getElementById('login-url-status');
   if (!url) { st.innerHTML = '<span style="color:#dc3545">Cole a URL antes de salvar.</span>'; return; }
   localStorage.setItem('coletores_script_url', url);
-  document.getElementById('inp-script-url').value = url;
+  const elConfig = document.getElementById('inp-script-url');
+  if (elConfig) elConfig.value = url;
   st.innerHTML = '<span style="color:#28a745">✅ URL salva! Faça login.</span>';
+  // Confirmar visualmente que ficou salva
+  setTimeout(() => { st.innerHTML = '<span style="color:#28a745">✅ URL salva permanentemente neste navegador.</span>'; }, 1500);
 }
 
 // ─── GESTÃO DE DADOS ─────────────────────────────────────────────────────────
@@ -1504,7 +1520,7 @@ function renderGestao() {
     '<td>' + (r.devolucao||'—') + '</td>' +
     '<td><span class="badge ' + (devolvido(r)?'badge-devolvido':'badge-pendente') + '">' + (devolvido(r)?'Devolvido':'Pendente') + '</span></td>' +
     '<td style="font-size:0.8rem;color:#c0392b;max-width:140px;white-space:normal">' + (r.ocorrenciaDev||r.ocorrencia||'') + '</td>' +
-    '<td><button class="btn-danger btn-sm" onclick="abrirModalExclusao('' + r.id + '')">🗑️</button></td>' +
+    (podeExcluir() ? '<td><button class="btn-danger btn-sm" onclick="abrirModalExclusao(this)" data-id="' + r.id + '">🗑</button></td>' : '<td></td>') +
     '</tr>'
   ).join('');
 }
@@ -1541,9 +1557,11 @@ function desmarcarTodos() {
 }
 
 // Modal exclusão individual
-function abrirModalExclusao(id) {
+function abrirModalExclusao(idOuEl) {
+  // Aceita id direto ou elemento com data-id
+  const id = (idOuEl && idOuEl.dataset) ? idOuEl.dataset.id : idOuEl;
   _exclId = id;
-  const r = registros.find(x => x.id == id);
+  const r = registros.find(x => String(x.id) === String(id));
   if (!r) return;
   document.getElementById('modal-excl-info').innerHTML =
     '<strong>' + r.nome + '</strong> · ' + (r.tipo==='terceiro'?r.cpf:r.matricula) + '<br>' +
