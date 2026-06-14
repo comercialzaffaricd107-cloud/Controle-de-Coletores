@@ -902,6 +902,7 @@ async function registrarRetirada() {
     turno    = document.getElementById('inp-turno').value;
     aparelho = document.getElementById('inp-aparelho').value.trim();
     serie    = document.getElementById('inp-serie').value.trim();
+    empresa  = 'Comercial Zaffari';
     if (!mat||!nome||!aparelho||!serie) { alert('Preencha todos os campos.'); return; }
   } else {
     if (!terceiroBuscado) { alert('Busque e selecione um terceiro pelo CPF.'); return; }
@@ -921,7 +922,7 @@ async function registrarRetirada() {
     : document.getElementById('inp-ocorrencia-terc').value.trim();
 
   const reg = {
-    id:Date.now(), data:new Date().toLocaleDateString('pt-BR'),
+    id:Date.now(), data:new Date().toISOString().split('T')[0],
     tipo:tipoAtual, matricula:mat, cpf, nome, empresa,
     turno, aparelho, serie, retirada:agora(), devolucao:null,
     ocorrencia, ocorrenciaDev:'', operador:sessao.nome
@@ -1183,9 +1184,13 @@ async function buscarHistorico() {
   tbody.innerHTML = '<tr><td colspan="12" class="empty">Carregando...</td></tr>';
 
   // 1. Ler do localStorage primeiro (sempre disponível)
-  const dataFmt = filtData.split('-').reverse().join('/');
+  // Suporte a datas em formato ISO (yyyy-mm-dd) e pt-BR (dd/mm/yyyy)
+  const dataFmt   = filtData; // já é yyyy-mm-dd (input type=date)
+  const dataFmtBR = filtData.split('-').reverse().join('/'); // dd/mm/yyyy (legado)
   let lista = registros.filter(r => {
-    if (r.data !== dataFmt) return false;
+    const dataR = r.data || '';
+    // Aceitar ambos os formatos
+    if (dataR !== dataFmt && dataR !== dataFmtBR) return false;
     if (filtTurno && r.turno !== filtTurno) return false;
     if (filtTipo  && r.tipo  !== filtTipo)  return false;
     if (filtStatus === 'DEVOLVIDO' && !devolvido(r)) return false;
@@ -1193,9 +1198,11 @@ async function buscarHistorico() {
     return true;
   });
 
+  dadosHistorico = lista;
   if (lista.length > 0) {
-    dadosHistorico = lista;
     renderHistorico(lista);
+  } else {
+    tbody.innerHTML = '<tr><td colspan="12" class="empty">Sem registros locais para esta data. Buscando no Sheets...</td></tr>';
   }
 
   // 2. Tentar Sheets em background para dados de outros dias
@@ -1207,8 +1214,8 @@ async function buscarHistorico() {
     if (json && json.registros && json.registros.length > 0) {
       dadosHistorico = json.registros;
       renderHistorico(json.registros);
-    } else if (lista.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro encontrado.</td></tr>';
+    } else if (dadosHistorico.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro encontrado para esta data.</td></tr>';
     }
   } catch(e) {
     if (lista.length === 0) {
@@ -1225,7 +1232,7 @@ function renderHistorico(lista) {
   if (!lista.length) { tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro</td></tr>'; return; }
   tbody.innerHTML = lista.map(r =>
     '<tr>' +
-    '<td>' + r.data + '</td>' +
+    '<td>' + (r.data && r.data.includes('-') ? r.data.split('-').reverse().join('/') : r.data) + '</td>' +
     '<td><span class="badge ' + (r.tipo==='terceiro'?'badge-terceiro':'badge-interno') + '">' + (r.tipo==='terceiro'?'Terceiro':'Interno') + '</span></td>' +
     '<td><span class="badge badge-' + (r.turno||'').toLowerCase() + '">' + r.turno + '</span></td>' +
     '<td style="font-family:monospace">' + (r.tipo==='terceiro'?r.cpf:r.matricula) + '</td>' +
@@ -1537,7 +1544,7 @@ function renderGestao() {
   tbody.innerHTML = _gestaoLista.map(r =>
     '<tr id="tr-' + r.id + '">' +
     '<td><input type="checkbox" class="chk-reg" value="' + r.id + '" onclick="atualizarSelecao()"></td>' +
-    '<td>' + r.data + '</td>' +
+    '<td>' + (r.data && r.data.includes('-') ? r.data.split('-').reverse().join('/') : r.data) + '</td>' +
     '<td><span class="badge ' + (r.tipo==='terceiro'?'badge-terceiro':'badge-interno') + '">' + (r.tipo==='terceiro'?'Terceiro':'Interno') + '</span></td>' +
     '<td style="font-family:monospace;font-size:0.82rem">' + (r.tipo==='terceiro'?r.cpf:r.matricula) + '</td>' +
     '<td><strong>' + r.nome + '</strong></td>' +
