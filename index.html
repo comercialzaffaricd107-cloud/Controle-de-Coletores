@@ -757,6 +757,18 @@ let voltarParaRetirada = false;
 let dadosHistorico = [];
 const SESSAO_MS   = 10 * 60 * 60 * 1000;
 
+// Migra planilhas antigas salvas como {matricula: 'Nome'} para {matricula:{nome,empresa}}
+if (colaboradores && Object.keys(colaboradores).length) {
+  let mudou = false;
+  Object.keys(colaboradores).forEach(k => {
+    if (typeof colaboradores[k] === 'string') {
+      colaboradores[k] = { nome: colaboradores[k], empresa: 'Comercial Zaffari' };
+      mudou = true;
+    }
+  });
+  if (mudou) localStorage.setItem('coletores_colaboradores', JSON.stringify(colaboradores));
+}
+
 // ─── INIT ────────────────────────────────────────────────────────────────────
 window.onload = () => {
   const _urlSalva = localStorage.getItem('coletores_script_url') || '';
@@ -966,21 +978,47 @@ document.getElementById('file-input').addEventListener('change', function(e) {
     try {
       const wb = XLSX.read(ev.target.result, {type:'binary'});
       const ws = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws, {header:1});
+      const data = XLSX.utils.sheet_to_json(ws, {header:1, defval:''});
       colaboradores = {}; let count = 0;
-      for (let i=1; i<data.length; i++) {
-        const row = data[i];
-        if (row[0]&&row[1]) { colaboradores[String(row[0]).trim()] = String(row[1]).trim(); count++; }
+
+      // Detecta automaticamente colunas de matrícula, nome e empresa.
+      // Assim a planilha pode vir como MATRICULA/NOME, Cadastro/Nome, Nome/Empresa etc.
+      const norm = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+      let headerIdx = 0;
+      for (let i=0; i<Math.min(data.length, 10); i++) {
+        const linha = data[i].map(norm);
+        if (linha.some(c => c.includes('matric') || c.includes('cadastro')) && linha.some(c => c.includes('nome'))) { headerIdx = i; break; }
       }
-      // Salvar permanentemente no localStorage
+      const headers = (data[headerIdx] || []).map(norm);
+      const idxMat = headers.findIndex(h => h.includes('matric') || h.includes('cadastro') || h === 'id');
+      const idxNome = headers.findIndex(h => h.includes('nome') || h.includes('colaborador') || h.includes('funcionario'));
+      const idxEmp = headers.findIndex(h => h.includes('empresa') || h.includes('empregador') || h.includes('companhia'));
+
+      for (let i=headerIdx+1; i<data.length; i++) {
+        const row = data[i] || [];
+        const matRaw = idxMat >= 0 ? row[idxMat] : row[0];
+        const nomeRaw = idxNome >= 0 ? row[idxNome] : row[1];
+        const empRaw = idxEmp >= 0 ? row[idxEmp] : 'Comercial Zaffari';
+        const mat = String(matRaw || '').replace(/\.0$/,'').trim();
+        const nome = String(nomeRaw || '').trim();
+        const empresa = String(empRaw || 'Comercial Zaffari').trim() || 'Comercial Zaffari';
+        if (!mat || !nome) continue;
+        colaboradores[mat] = { nome, empresa };
+        count++;
+      }
+
       localStorage.setItem('coletores_colaboradores', JSON.stringify(colaboradores));
       localStorage.setItem('coletores_colaboradores_info', JSON.stringify({
         nome: file.name, count, data: new Date().toLocaleDateString('pt-BR'),
-        hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})
+        hora: new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}),
+        empresaPadrao: 'Comercial Zaffari'
       }));
       atualizarBannerColaboradores();
       toast('✅ ' + count + ' colaboradores carregados e salvos!', '#28a745');
-    } catch { document.getElementById('file-status').textContent = '❌ Erro ao ler planilha'; }
+    } catch (err) {
+      console.error('Erro ao importar colaboradores:', err);
+      document.getElementById('file-status').textContent = '❌ Erro ao ler planilha';
+    }
   };
   reader.readAsBinaryString(file);
 });
@@ -1000,8 +1038,10 @@ document.getElementById('inp-matricula').addEventListener('input', function() {
   const msg = document.getElementById('msg-matricula');
   const inp = document.getElementById('inp-nome');
   if (colaboradores[mat]) {
-    inp.value = colaboradores[mat]; inp.readOnly = true;
-    msg.textContent = '✓ Encontrado'; msg.className = 'msg-ok';
+    const cad = colaboradores[mat];
+    inp.value = typeof cad === 'string' ? cad : cad.nome;
+    inp.readOnly = true;
+    msg.textContent = '✓ Encontrado · Comercial Zaffari'; msg.className = 'msg-ok';
   } else if (mat.length >= 4) {
     inp.value = ''; inp.readOnly = false;
     msg.textContent = 'Não encontrado — preencha manualmente'; msg.className = 'msg-err';
@@ -1065,7 +1105,7 @@ async function registrarRetirada() {
     turno    = document.getElementById('inp-turno').value;
     aparelho = document.getElementById('inp-aparelho').value.trim();
     serie    = document.getElementById('inp-serie').value.trim();
-    empresa  = 'Comercial Zaffari';
+    empresa  = (typeof colaboradores[mat] === 'object' && colaboradores[mat].empresa) ? colaboradores[mat].empresa : 'Comercial Zaffari';
     if (!mat||!nome||!aparelho||!serie) { alert('Preencha todos os campos.'); return; }
   } else {
     if (!terceiroBuscado) { alert('Busque e selecione um terceiro pelo CPF.'); return; }
@@ -1085,7 +1125,7 @@ async function registrarRetirada() {
     : document.getElementById('inp-ocorrencia-terc').value.trim();
 
   const reg = {
-    id:Date.now(), data:new Date().toISOString().split('T')[0],
+    id:Date.now(), data:hojeISO(),
     tipo:tipoAtual, matricula:mat, cpf, nome, empresa,
     turno, aparelho, serie, retirada:agora(), devolucao:null,
     ocorrencia, ocorrenciaDev:'', operador:sessao.nome
@@ -1182,7 +1222,7 @@ async function confirmarExclusao() {
   fecharModalExclusao();
   renderizar();
   if (_exclOrigem === 'historico') renderHistorico(
-    registros.filter(r => r.data === document.getElementById('hist-data').value.split('-').reverse().join('/'))
+    registros.filter(r => normalizarDataISO(r.data) === document.getElementById('hist-data').value)
   );
   await post({acao: 'excluirRegistro', id: _exclId, motivo, operador: sessao.nome});
   toast('Registro excluído.', '#dc3545');
@@ -1191,8 +1231,8 @@ async function confirmarExclusao() {
 // ─── RENDERIZAR TURNO ────────────────────────────────────────────────────────
 function renderizar() {
   const tbody = document.getElementById('tbody-registros');
-  const hoje  = new Date().toLocaleDateString('pt-BR');
-  const regs  = registros.filter(r => r.data===hoje);
+  const hoje  = hojeISO();
+  const regs  = registros.filter(r => normalizarDataISO(r.data) === hoje);
 
   if (!regs.length) {
     tbody.innerHTML = '<tr><td colspan="12" class="empty">Nenhum registro ainda</td></tr>';
@@ -1490,9 +1530,8 @@ async function buscarHistorico() {
   const dataFmt   = filtData; // já é yyyy-mm-dd (input type=date)
   const dataFmtBR = filtData.split('-').reverse().join('/'); // dd/mm/yyyy (legado)
   let lista = registros.filter(r => {
-    const dataR = r.data || '';
-    // Aceitar ambos os formatos
-    if (dataR !== dataFmt && dataR !== dataFmtBR) return false;
+    const dataR = normalizarDataISO(r.data || '');
+    if (dataR !== dataFmt) return false;
     if (filtTurno && r.turno !== filtTurno) return false;
     if (filtTipo  && r.tipo  !== filtTipo)  return false;
     if (filtStatus === 'DEVOLVIDO' && !devolvido(r)) return false;
@@ -1648,6 +1687,23 @@ async function testarUrl() {
 }
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
+function hojeISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return y + '-' + m + '-' + day;
+}
+function normalizarDataISO(v) {
+  if (!v) return '';
+  const s = String(v).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(s)) {
+    const [d,m,y] = s.split('/');
+    return y + '-' + m + '-' + d;
+  }
+  return s;
+}
 function agora() { return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 
 function atualizarBannerColaboradores() {
@@ -1733,22 +1789,18 @@ function postNoCorsFire(body) {
   if (!url) return;
   const payload = encodeURIComponent(JSON.stringify(body));
   const sep = url.includes('?') ? '&' : '?';
-  const src = url + sep + 'acao=' + (body.acao||'') + '&payload=' + payload + '&t=' + Date.now();
-  // Usa imagem 1x1 — não sofre CORS e dispara GET no servidor
+  const src = url + sep + 'acao=' + encodeURIComponent(body.acao||'') + '&payload=' + payload + '&t=' + Date.now();
+  // Dispara GET no Apps Script sem depender de CORS. O salvamento local já foi feito antes.
+  try { fetch(src, { mode:'no-cors', cache:'no-store' }).catch(()=>{}); } catch(e) {}
   const img = new Image();
   img.src = src;
-  // Fallback: script tag sem callback
-  const script = document.createElement('script');
-  script.src = src + '&callback=_noop';
-  window._noop = window._noop || function(){};
-  document.head.appendChild(script);
-  setTimeout(() => { if (script.parentNode) script.parentNode.removeChild(script); }, 5000);
 }
 
 async function post(body) {
   // Ações de escrita: dispara no-cors E tenta jsonp
   const escrita = ['registrarRetirada','registrarDevolucao','salvarUsuario',
-                   'excluirUsuario','salvarTerceiro','excluirTerceiro'];
+                   'excluirUsuario','salvarTerceiro','excluirTerceiro',
+                   'salvarAparelho','excluirRegistro','logAuditoria'];
   if (escrita.includes(body.acao)) {
     postNoCorsFire(body); // fire-and-forget para Sheets
     return { ok: true };  // localStorage já salvou, retorna ok imediatamente
@@ -1821,8 +1873,7 @@ function carregarGestao() {
 
   _gestaoLista = registros.filter(r => {
     if (filtData) {
-      const dataFmt = filtData.split('-').reverse().join('/');
-      if (r.data !== dataFmt) return false;
+      if (normalizarDataISO(r.data) !== filtData) return false;
     }
     if (filtTurno  && r.turno !== filtTurno) return false;
     if (filtStatus === 'DEVOLVIDO' && !devolvido(r)) return false;
