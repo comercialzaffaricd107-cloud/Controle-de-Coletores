@@ -93,6 +93,11 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .badge-ativo   { background: #d4edda; color: #155724; }
 .badge-inativo { background: #f8d7da; color: #842029; }
 .badge-terceiro { background: #e8d5f7; color: #5a1f8a; }
+.badge-disponivel  { background: #d4edda; color: #155724; }
+.badge-em-uso      { background: #cfe2ff; color: #084298; }
+.badge-defeito     { background: #fff3cd; color: #856404; }
+.badge-manutencao  { background: #f8d7da; color: #842029; }
+.badge-extraviado  { background: #343a40; color: #ffffff; }
 .badge-interno  { background: #cfe2ff; color: #084298; }
 
 /* TIPO COLABORADOR TOGGLE */
@@ -340,6 +345,45 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
       <div class="card">
         <h2>⚠️ Pendências de Final de Turno</h2>
         <div id="pendencias-list"><div class="empty">Nenhuma pendência ✅</div></div>
+      </div>
+    </div>
+
+    <!-- ═══════ ABA APARELHOS ═══════ -->
+    <div id="tab-aparelhos" class="tab-content">
+
+      <!-- CARDS RESUMO -->
+      <div class="stats" style="grid-template-columns:repeat(5,1fr);margin-bottom:20px;">
+        <div class="stat-card azul">  <div class="num" id="ap-total">0</div><div class="lbl">Total</div></div>
+        <div class="stat-card verde"> <div class="num" id="ap-disp">0</div> <div class="lbl">Disponível</div></div>
+        <div class="stat-card" style="background:#fff;"><div class="num" id="ap-uso" style="color:#2d6a9f">0</div><div class="lbl">Em Uso</div></div>
+        <div class="stat-card" style="background:#fff;"><div class="num" id="ap-def" style="color:#e67e22">0</div><div class="lbl">Defeito/Manu.</div></div>
+        <div class="stat-card" style="background:#fff;"><div class="num" id="ap-ext" style="color:#dc3545">0</div><div class="lbl">Extraviado</div></div>
+      </div>
+
+      <div class="card">
+        <h2>📱 Cadastro de Aparelhos
+          <button class="btn-primary btn-sm" onclick="abrirModalAparelho(null)">+ Novo Aparelho</button>
+        </h2>
+        <div class="search-box">
+          <input type="text" id="busca-aparelho" placeholder="Buscar por nome, série, patrimônio ou setor..." oninput="filtrarAparelhos()">
+          <select id="filtro-status-ap" onchange="filtrarAparelhos()" style="border:1.5px solid #ddd;border-radius:6px;padding:9px 12px;font-size:0.9rem;min-width:160px;">
+            <option value="">Todos os status</option>
+            <option value="Disponível">Disponível</option>
+            <option value="Em uso">Em uso</option>
+            <option value="Defeito">Defeito</option>
+            <option value="Manutenção">Manutenção</option>
+            <option value="Extraviado">Extraviado</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>Nome / Modelo</th><th>Nº Série</th><th>Patrimônio</th>
+              <th>Setor</th><th>Status</th><th>Observação</th><th>Ações</th>
+            </tr></thead>
+            <tbody id="tbody-aparelhos"><tr><td colspan="7" class="empty">Nenhum aparelho cadastrado</td></tr></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -612,6 +656,60 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
   </div>
 </div>
 
+<!-- MODAL APARELHO -->
+<div class="modal-bg" id="modal-bg-aparelho">
+  <div class="modal">
+    <h3 id="modal-ap-titulo">Cadastrar Aparelho</h3>
+    <input type="hidden" id="modal-ap-id">
+    <div class="form-grid-3" style="gap:12px;margin-bottom:12px;">
+      <div class="form-group" style="grid-column:span 2">
+        <label>Nome / Modelo *</label>
+        <input type="text" id="modal-ap-nome" placeholder="Ex: Honeywell CK65">
+      </div>
+      <div class="form-group">
+        <label>Status *</label>
+        <select id="modal-ap-status" onchange="toggleCampoPrevisao()">
+          <option value="Disponível">Disponível</option>
+          <option value="Em uso">Em uso</option>
+          <option value="Defeito">Defeito</option>
+          <option value="Manutenção">Manutenção</option>
+          <option value="Extraviado">Extraviado</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid-3" style="gap:12px;margin-bottom:12px;">
+      <div class="form-group">
+        <label>Nº de Série *</label>
+        <input type="text" id="modal-ap-serie" placeholder="Ex: COL-001">
+      </div>
+      <div class="form-group">
+        <label>Patrimônio</label>
+        <input type="text" id="modal-ap-patrim" placeholder="Ex: 000123">
+      </div>
+      <div class="form-group">
+        <label>Setor</label>
+        <input type="text" id="modal-ap-setor" placeholder="Ex: Separação">
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:4px;">
+      <label>Observação</label>
+      <input type="text" id="modal-ap-obs" placeholder="Ex: tela trincada, bateria fraca...">
+    </div>
+    <!-- Campo data reparo — só aparece em Defeito/Manutenção -->
+    <div id="campo-previsao" style="display:none;margin-top:10px;">
+      <div class="form-group">
+        <label>Previsão de Retorno</label>
+        <input type="date" id="modal-ap-retorno">
+      </div>
+    </div>
+    <div id="modal-ap-erro" style="color:#dc3545;font-size:0.82rem;min-height:16px;margin-top:8px;"></div>
+    <div class="modal-btns">
+      <button class="btn-primary" style="background:#6c757d;" onclick="fecharModalAparelho()">Cancelar</button>
+      <button class="btn-primary" onclick="salvarAparelho()">Salvar Aparelho</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL USUÁRIO -->
 <div class="modal-bg" id="modal-bg-usuario">
   <div class="modal">
@@ -665,6 +763,7 @@ input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; accent-colo
 // ─── ESTADO GLOBAL ──────────────────────────────────────────────────────────
 let colaboradores = JSON.parse(localStorage.getItem('coletores_colaboradores') || '{}');
 let terceiros     = JSON.parse(localStorage.getItem('coletores_terceiros') || '[]');
+let aparelhos     = JSON.parse(localStorage.getItem('coletores_aparelhos') || '[]');
 let registros     = JSON.parse(localStorage.getItem('coletores_registros') || '[]');
 let sessao        = JSON.parse(localStorage.getItem('coletores_sessao')    || 'null');
 let tipoAtual     = 'interno';
@@ -765,6 +864,7 @@ function montarAbas() {
   const abas = [
     { id:'turno',     label:'📋 Turno Atual',   perfis:['Operador','Supervisor'] },
     { id:'terceiros', label:'🤝 Terceiros',       perfis:['Operador','Supervisor'] },
+    { id:'aparelhos', label:'📱 Aparelhos',       perfis:['Operador','Supervisor'] },
     { id:'historico', label:'🗂️ Histórico',      perfis:['Supervisor'] },
     { id:'usuarios',  label:'👥 Usuários',        perfis:['Supervisor'] },
     { id:'gestao',    label:'🗑️ Gestão de Dados', perfis:['Supervisor'] },
@@ -792,6 +892,7 @@ function showTab(name, btn) {
   if (btn) btn.classList.add('active');
   if (name === 'usuarios') carregarUsuarios();
   if (name === 'terceiros') renderTerceiros();
+  if (name === 'aparelhos') renderAparelhos();
   if (name === 'auditoria') renderAuditoria();
 }
 
@@ -1077,6 +1178,127 @@ function renderizar() {
 }
 
 // ─── TERCEIROS CRUD ──────────────────────────────────────────────────────────
+// ─── APARELHOS ───────────────────────────────────────────────────────────────
+function statusBadgeAp(s) {
+  const map = {
+    'Disponível': 'disponivel', 'Em uso': 'em-uso',
+    'Defeito': 'defeito', 'Manutenção': 'manutencao', 'Extraviado': 'extraviado'
+  };
+  return 'badge-' + (map[s] || 'disponivel');
+}
+
+function salvarAparelhoLocal() {
+  localStorage.setItem('coletores_aparelhos', JSON.stringify(aparelhos));
+}
+
+function renderAparelhos(lista) {
+  const todos = lista !== undefined ? lista : aparelhos;
+  const tbody = document.getElementById('tbody-aparelhos');
+
+  // Atualizar cards de resumo
+  document.getElementById('ap-total').textContent = aparelhos.length;
+  document.getElementById('ap-disp').textContent  = aparelhos.filter(a => a.status === 'Disponível').length;
+  document.getElementById('ap-uso').textContent   = aparelhos.filter(a => a.status === 'Em uso').length;
+  document.getElementById('ap-def').textContent   = aparelhos.filter(a => a.status === 'Defeito' || a.status === 'Manutenção').length;
+  document.getElementById('ap-ext').textContent   = aparelhos.filter(a => a.status === 'Extraviado').length;
+
+  if (!todos.length) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty">Nenhum aparelho encontrado</td></tr>'; return;
+  }
+  tbody.innerHTML = todos.map(a => {
+    const retorno = a.retorno ? ' · Retorno: ' + a.retorno.split('-').reverse().join('/') : '';
+    return '<tr>' +
+      '<td><strong>' + a.nome + '</strong></td>' +
+      '<td style="font-family:monospace">' + a.serie + '</td>' +
+      '<td>' + (a.patrim || '—') + '</td>' +
+      '<td>' + (a.setor  || '—') + '</td>' +
+      '<td><span class="badge ' + statusBadgeAp(a.status) + '">' + a.status + '</span>' + retorno + '</td>' +
+      '<td style="max-width:180px;white-space:normal;font-size:0.82rem;color:#666">' + (a.obs || '') + '</td>' +
+      '<td style="display:flex;gap:6px;flex-wrap:wrap;">' +
+        '<button class="btn-warn btn-sm" onclick='abrirModalAparelho(' + JSON.stringify(a).replace(/'/g,"&#39;") + ')'>Editar</button>' +
+        (a.status === 'Defeito' || a.status === 'Manutenção'
+          ? '<button class="btn-success btn-sm" onclick="marcarOk('' + a.id + '')">✔ OK</button>' : '') +
+      '</td></tr>';
+  }).join('');
+}
+
+function filtrarAparelhos() {
+  const q  = document.getElementById('busca-aparelho').value.toLowerCase();
+  const st = document.getElementById('filtro-status-ap').value;
+  const lista = aparelhos.filter(a =>
+    (!q  || a.nome.toLowerCase().includes(q) || a.serie.toLowerCase().includes(q) ||
+             (a.patrim||'').toLowerCase().includes(q) || (a.setor||'').toLowerCase().includes(q)) &&
+    (!st || a.status === st)
+  );
+  renderAparelhos(lista);
+}
+
+function abrirModalAparelho(a) {
+  document.getElementById('modal-ap-erro').textContent = '';
+  document.getElementById('modal-ap-id').value      = a ? a.id    : '';
+  document.getElementById('modal-ap-nome').value    = a ? a.nome  : '';
+  document.getElementById('modal-ap-serie').value   = a ? a.serie : '';
+  document.getElementById('modal-ap-patrim').value  = a ? (a.patrim||'') : '';
+  document.getElementById('modal-ap-setor').value   = a ? (a.setor||'')  : '';
+  document.getElementById('modal-ap-status').value  = a ? a.status : 'Disponível';
+  document.getElementById('modal-ap-obs').value     = a ? (a.obs||'') : '';
+  document.getElementById('modal-ap-retorno').value = a ? (a.retorno||'') : '';
+  document.getElementById('modal-ap-titulo').textContent = a ? 'Editar Aparelho' : 'Cadastrar Aparelho';
+  toggleCampoPrevisao();
+  document.getElementById('modal-bg-aparelho').classList.add('open');
+}
+
+function fecharModalAparelho() {
+  document.getElementById('modal-bg-aparelho').classList.remove('open');
+}
+
+function toggleCampoPrevisao() {
+  const st  = document.getElementById('modal-ap-status').value;
+  const box = document.getElementById('campo-previsao');
+  if (box) box.style.display = (st === 'Defeito' || st === 'Manutenção') ? 'block' : 'none';
+}
+
+async function salvarAparelho() {
+  const id     = document.getElementById('modal-ap-id').value;
+  const nome   = document.getElementById('modal-ap-nome').value.trim();
+  const serie  = document.getElementById('modal-ap-serie').value.trim();
+  const patrim = document.getElementById('modal-ap-patrim').value.trim();
+  const setor  = document.getElementById('modal-ap-setor').value.trim();
+  const status = document.getElementById('modal-ap-status').value;
+  const obs    = document.getElementById('modal-ap-obs').value.trim();
+  const retorno= document.getElementById('modal-ap-retorno').value;
+  const erro   = document.getElementById('modal-ap-erro');
+  if (!nome)  { erro.textContent = 'Nome obrigatório.'; return; }
+  if (!serie) { erro.textContent = 'Nº de série obrigatório.'; return; }
+  // Verificar série duplicada
+  const dup = aparelhos.find(a => a.serie === serie && a.id !== id);
+  if (dup) { erro.textContent = 'Nº de série já cadastrado.'; return; }
+  if (id) {
+    const idx = aparelhos.findIndex(a => a.id === id);
+    if (idx >= 0) aparelhos[idx] = { ...aparelhos[idx], nome, serie, patrim, setor, status, obs, retorno };
+  } else {
+    aparelhos.push({ id: Date.now().toString(), nome, serie, patrim, setor, status, obs, retorno,
+      cadastradoEm: new Date().toISOString().split('T')[0] });
+  }
+  salvarAparelhoLocal();
+  fecharModalAparelho();
+  renderAparelhos();
+  await post({ acao: 'salvarAparelho', id: id||null, nome, serie, patrim, setor, status, obs, retorno });
+  toast(id ? '✅ Aparelho atualizado!' : '✅ Aparelho cadastrado!', '#1a3a5c');
+}
+
+async function marcarOk(id) {
+  const ap = aparelhos.find(a => a.id === id); if (!ap) return;
+  if (!confirm('Marcar "' + ap.nome + '" (' + ap.serie + ') como Disponível?')) return;
+  ap.status  = 'Disponível';
+  ap.retorno = '';
+  ap.obs     = ap.obs ? ap.obs + ' [Retornou em ' + new Date().toLocaleDateString('pt-BR') + ']' : 'Retornou em ' + new Date().toLocaleDateString('pt-BR');
+  salvarAparelhoLocal();
+  renderAparelhos();
+  await post({ acao: 'salvarAparelho', ...ap });
+  toast('✅ Aparelho marcado como Disponível!', '#28a745');
+}
+
 function renderTerceiros(lista) {
   const todos = lista || terceiros.filter(t => t.ativo !== false);
   const tbody = document.getElementById('tbody-terceiros');
