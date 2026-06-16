@@ -1090,39 +1090,35 @@ function filterOcorrencias(){
       </span>
     </td>
     <td>${calcTempoUso(r)}</td>
-    ${isAdmin?`<td><button class="btn btn-sm btn-danger" onclick="excluirOcorrencia('${r.id}')" title="Excluir ocorrência">🗑️</button></td>`:'<td></td>'}
+    <td><button class="btn btn-sm btn-danger" onclick="excluirOcorrencia('${r.id}')" title="Excluir ocorrência">🗑️</button></td>
   </tr>`).join('');
   const totalOc=arr.length;
   document.getElementById('ocTabela').innerHTML=`
   <div style="margin-bottom:12px" class="flex-row">
     <span class="badge badge-${totalOc>0?'vermelho':'verde'}">${totalOc} ocorrência(s) encontrada(s)</span>
-    ${isAdmin&&totalOc>0?'<span class="text-muted" style="font-size:12px">Supervisores podem excluir ocorrências individualmente</span>':''}
   </div>
   ${totalOc===0
     ?'<div class="empty-state"><div class="icon">✅</div><p>Nenhuma ocorrência no período</p></div>'
     :`<div class="table-wrap"><table><thead><tr>
       <th>Data Dev.</th><th>Hora Dev.</th><th>Aparelho</th><th>Série</th>
-      <th>Colaborador</th><th>Mat/CPF</th><th>Turno</th><th>Ocorrência</th><th>⏱️ Tempo</th>
-      ${isAdmin?'<th>Ação</th>':'<th></th>'}
+      <th>Colaborador</th><th>Mat/CPF</th><th>Turno</th><th>Ocorrência</th><th>⏱️ Tempo</th><th>Ação</th>
     </tr></thead><tbody>${tbody}</tbody></table></div>
     <p class="text-muted" style="margin-top:8px">${totalOc} registro(s)</p>`
   }`;
 }
 function excluirOcorrencia(retId){
-  if(SESSION?.perfil!=='Supervisor'){toast('Apenas supervisores podem excluir ocorrências','error');return;}
   const r=DB.retiradas.find(x=>x.id==retId);
   if(!r||!r.obsDevolucao){toast('Ocorrência não encontrada','error');return;}
   const motivo=prompt(`Excluir a ocorrência:\n"${r.obsDevolucao}"\n\nInforme o motivo da exclusão:`);
-  if(motivo===null)return; // cancelou
+  if(motivo===null)return;
   if(!motivo.trim()){toast('Informe o motivo para excluir','error');return;}
-  // Limpa a observação da devolução (mantém o registro de retirada/devolução)
   const obsAnterior=r.obsDevolucao;
   r.obsDevolucao='';
-  // Se o aparelho ainda está como Defeito por causa dessa ocorrência, volta para Disponível
   const ap=DB.aparelhos.find(a=>a.id==r.aparelhoId);
-  if(ap&&ap.status==='Defeito'&&ap.ultimaOcorrencia){
-    const mesmaObs=ap.ultimaOcorrencia.obs===obsAnterior;
-    if(mesmaObs){ap.status='Disponível';delete ap.ultimaOcorrencia;save('aparelhos');}
+  if(ap&&ap.status==='Defeito'&&ap.ultimaOcorrencia&&ap.ultimaOcorrencia.obs===obsAnterior){
+    ap.status='Disponível';
+    delete ap.ultimaOcorrencia;
+    save('aparelhos');
   }
   save('retiradas');
   auditLog('Exclusão de Ocorrência',`Retirada #${retId} — Obs removida: "${obsAnterior}" — Motivo: ${motivo}`);
