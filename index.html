@@ -255,6 +255,7 @@ tbody td{padding:9px 12px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
       <span>CD 107 — Nova Santa Rita</span>
     </div>
     <div class="user-info">
+      <span id="syncIndicator" title="Status de sincronização" style="cursor:pointer;font-size:13px" onclick="showPage('config')"></span>
       <div class="avatar" id="headerAvatar">U</div>
       <span id="headerUser">Usuário</span>
       <span id="headerPerfil" class="badge badge-azul" style="font-size:11px"></span>
@@ -453,6 +454,7 @@ function save(key){
     if(key==='colaboradores'){
       const manuais=DB.colaboradores.filter(c=>c._manual);
       localStorage.setItem('cc_colaboradores_manuais', JSON.stringify(manuais));
+      _agendarSync();
       return;
     }
     // Para aparelhos, salva apenas status alterados (economiza espaço)
@@ -463,9 +465,11 @@ function save(key){
       localStorage.setItem('cc_aparelhos_status', JSON.stringify(statusMap));
       if(customAp.length>0) localStorage.setItem('cc_aparelhos_custom', JSON.stringify(customAp));
       else localStorage.removeItem('cc_aparelhos_custom');
+      _agendarSync();
       return;
     }
     localStorage.setItem('cc_'+key, JSON.stringify(DB[key]));
+    if(['retiradas','terceiros','usuarios'].includes(key)) _agendarSync();
   }catch(e){
     if(e.name==='QuotaExceededError'||e.message.includes('quota')){
       if(key==='auditoria'){ DB.auditoria=DB.auditoria.slice(0,50); }
@@ -474,6 +478,13 @@ function save(key){
   }
 }
 function saveAll(){ ['usuarios','terceiros','aparelhos','retiradas','auditoria','colabImport','colaboradores'].forEach(save); }
+// Agenda uma sincronização com pequeno debounce para não disparar múltiplas vezes em sequência
+let _syncTimeout=null;
+function _agendarSync(){
+  if(!getGsUrl()) return;
+  if(_syncTimeout) clearTimeout(_syncTimeout);
+  _syncTimeout=setTimeout(()=>sincronizarAgora(false),1200);
+}
 
 function hashStr(s){ let h=0; for(let i=0;i<s.length;i++){h=Math.imul(31,h)+s.charCodeAt(i)|0;} return h.toString(16); }
 
@@ -523,6 +534,8 @@ function startSession(){
   }
   showPage('dashboard');
   setInterval(checkSession,60000);
+  atualizarIndicadorSync(getGsUrl()?'syncing':'off');
+  iniciarSyncAutomatico();
 }
 function checkSession(){
   if(!SESSION)return;
@@ -1984,13 +1997,24 @@ function renderAuditoria(){
 function renderConfig(){
   if(SESSION?.perfil!=='Supervisor')return'<div class="empty-state"><div class="icon">🔒</div><p>Acesso restrito</p></div>';
   const gsCfg=JSON.parse(localStorage.getItem('cc_gsCfg')||'{}');
+  const statusSync = gsCfg.url
+    ? (ultimaSincronizacao
+        ? `<span class="badge badge-verde">✅ Conectado — última sync: ${ultimaSincronizacao.toLocaleTimeString('pt-BR')}</span>`
+        : `<span class="badge badge-laranja">⚠️ URL configurada, ainda não sincronizado</span>`)
+    : `<span class="badge badge-cinza">🔌 Não conectado (apenas local)</span>`;
   return`<div class="page-title">⚙️ Configurações</div>
-  <div class="panel"><div class="panel-header"><h3>🔗 Google Sheets</h3></div><div class="panel-body">
+  <div class="panel"><div class="panel-header"><h3>🔗 Google Sheets — Sincronização entre PCs</h3></div><div class="panel-body">
+    <p class="text-muted" style="margin-bottom:12px">Configure isso para que todos os computadores do CD 107 compartilhem o mesmo banco de dados. Sem isso, cada PC funciona isolado.</p>
+    <div style="margin-bottom:12px">${statusSync}</div>
     <div class="form-row">
       <div class="form-group-inline" style="grid-column:1/-1"><label>URL do Web App (Apps Script)</label><input type="text" id="gs_url" value="${gsCfg.url||''}" placeholder="https://script.google.com/macros/s/.../exec"></div>
     </div>
-    <button class="btn btn-success" onclick="salvarGsConfig()">💾 Salvar URL</button>
-    <button class="btn btn-outline" onclick="testarGsConnection()" style="margin-left:8px">🔍 Testar Conexão</button>
+    <div class="flex-row">
+      <button class="btn btn-success" onclick="salvarGsConfig()">💾 Salvar URL</button>
+      <button class="btn btn-outline" onclick="testarGsConnection()">🔍 Testar Conexão</button>
+      ${gsCfg.url?`<button class="btn btn-warning" onclick="sincronizarManual()">🔄 Sincronizar Agora</button>`:''}
+    </div>
+    <p class="text-muted" style="margin-top:10px;font-size:11px">💡 Sincronização automática ocorre a cada 20 segundos e após cada retirada/devolução/cadastro.</p>
   </div></div>
   <div class="panel"><div class="panel-header"><h3>💾 Dados Locais</h3></div><div class="panel-body">
     <div class="flex-row">
@@ -2006,14 +2030,30 @@ function salvarGsConfig(){
   localStorage.setItem('cc_gsCfg',JSON.stringify({url}));
   auditLog('Config','URL Google Sheets atualizada');
   toast('Configuração salva!');
+  if(url){ iniciarSyncAutomatico(); }
+  else { pararSyncAutomatico(); }
+  setTimeout(()=>showPage('config'),300);
 }
 async function testarGsConnection(){
-  const cfg=JSON.parse(localStorage.getItem('cc_gsCfg')||'{}');
-  if(!cfg.url){toast('Configure a URL primeiro','error');return;}
+  const url=getGsUrl();
+  if(!url){toast('Configure a URL primeiro','error');return;}
+  toast('Testando conexão...','info');
   try{
-    await fetch(cfg.url+'?action=ping',{method:'GET',mode:'no-cors'});
-    toast('Conexão realizada (verifique o Apps Script)','info');
-  }catch(e){toast('Erro ao conectar: '+e.message,'error');}
+    const resp=await fetch(url+'?action=ping');
+    const data=await resp.json();
+    if(data.ok){
+      toast('✅ Conexão bem-sucedida com o Google Sheets!','success');
+    }else{
+      toast('Resposta inesperada do servidor: '+(data.error||'desconhecido'),'error');
+    }
+  }catch(e){
+    toast('❌ Erro ao conectar: '+e.message,'error');
+  }
+}
+async function sincronizarManual(){
+  toast('🔄 Sincronizando...','info');
+  await sincronizarAgora(true);
+  setTimeout(()=>showPage('config'),300);
 }
 function exportarBackup(){
   const data=JSON.stringify(DB,null,2);
@@ -2118,14 +2158,126 @@ function exportarPDF(){
 }
 
 // ============================================================
-// SYNC GOOGLE SHEETS (basic)
+// SYNC GOOGLE SHEETS (sincronização real entre PCs)
 // ============================================================
-async function syncGS(acao,dados){
+let syncEmAndamento=false;
+let syncPendente=false;
+let ultimaSincronizacao=null;
+
+function getGsUrl(){
   const cfg=JSON.parse(localStorage.getItem('cc_gsCfg')||'{}');
-  if(!cfg.url)return;
+  return cfg.url||'';
+}
+
+async function sincronizarAgora(mostrarFeedback){
+  const url=getGsUrl();
+  if(!url){ atualizarIndicadorSync('off'); return; }
+  if(syncEmAndamento){ syncPendente=true; return; }
+  syncEmAndamento=true;
+  atualizarIndicadorSync('syncing');
   try{
-    await fetch(cfg.url,{method:'POST',mode:'no-cors',body:JSON.stringify({acao,...dados})});
-  }catch(e){}
+    // 1) Envia os dados locais para a planilha
+    await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({
+        action:'push',
+        data:{
+          retiradas: DB.retiradas,
+          aparelhosStatus: DB.aparelhos.filter(a=>a.status!=='Disponível'||a.obs).map(a=>({id:a.id,status:a.status,obs:a.obs||'',ultimaOcorrencia:a.ultimaOcorrencia||''})),
+          terceiros: DB.terceiros,
+          usuarios: DB.usuarios,
+          colaboradoresManuais: DB.colaboradores.filter(c=>c._manual)
+        }
+      })
+    });
+    // 2) Busca os dados mais recentes da planilha (de outros PCs)
+    const resp=await fetch(url+'?action=pull');
+    const result=await resp.json();
+    if(result.ok){
+      aplicarDadosRemotos(result);
+      ultimaSincronizacao=new Date();
+      atualizarIndicadorSync('ok');
+      if(mostrarFeedback) toast('🔄 Sincronizado com sucesso!','success');
+    }else{
+      atualizarIndicadorSync('error');
+    }
+  }catch(e){
+    atualizarIndicadorSync('error');
+    if(mostrarFeedback) toast('Erro ao sincronizar: '+e.message,'error');
+  }finally{
+    syncEmAndamento=false;
+    if(syncPendente){ syncPendente=false; setTimeout(()=>sincronizarAgora(false),500); }
+  }
+}
+function atualizarIndicadorSync(status){
+  const el=document.getElementById('syncIndicator');
+  if(!el) return;
+  const map={
+    off:'⚪ Local',
+    syncing:'🔄 Sincronizando...',
+    ok:'🟢 Sincronizado',
+    error:'🔴 Erro de sync'
+  };
+  el.textContent=map[status]||'';
+}
+
+function aplicarDadosRemotos(result){
+  // Mescla retiradas remotas com locais (remoto é fonte de verdade após push)
+  if(Array.isArray(result.retiradas) && result.retiradas.length>0){
+    DB.retiradas=result.retiradas.map(r=>({
+      ...r,
+      id:Number(r.id),
+      aparelhoId:Number(r.aparelhoId)
+    }));
+    localStorage.setItem('cc_retiradas',JSON.stringify(DB.retiradas));
+  }
+  // Aplica status remotos dos aparelhos
+  if(Array.isArray(result.aparelhosStatus)){
+    const statusMap={};
+    result.aparelhosStatus.forEach(s=>{ statusMap[Number(s.id)]={status:s.status,obs:s.obs,ultimaOcorrencia:s.ultimaOcorrencia}; });
+    DB.aparelhos.forEach(a=>{
+      const info=statusMap[a.id];
+      if(info){
+        a.status=info.status||a.status;
+        a.obs=info.obs||a.obs;
+        if(info.ultimaOcorrencia) a.ultimaOcorrencia=info.ultimaOcorrencia;
+      }
+    });
+    const statusMapSave={};
+    DB.aparelhos.forEach(a=>{ if(a.status!=='Disponível') statusMapSave[a.id]=a.status; });
+    localStorage.setItem('cc_aparelhos_status',JSON.stringify(statusMapSave));
+  }
+  // Terceiros
+  if(Array.isArray(result.terceiros)){
+    DB.terceiros=result.terceiros.map(t=>({...t,id:Number(t.id)}));
+    localStorage.setItem('cc_terceiros',JSON.stringify(DB.terceiros));
+  }
+  // Usuários (mescla preservando locais que não vieram, ex recém criados antes do 1º sync)
+  if(Array.isArray(result.usuarios) && result.usuarios.length>0){
+    DB.usuarios=result.usuarios.map(u=>({...u,id:Number(u.id)}));
+    localStorage.setItem('cc_usuarios',JSON.stringify(DB.usuarios));
+  }
+  // Colaboradores manuais
+  if(Array.isArray(result.colaboradoresManuais)){
+    const manuais=result.colaboradoresManuais.map(c=>({...c,id:Number(c.id),_manual:true}));
+    DB.colaboradores=[...DB.colaboradores.filter(c=>!c._manual),...manuais];
+    localStorage.setItem('cc_colaboradores_manuais',JSON.stringify(manuais));
+  }
+  // Re-renderiza a página atual para refletir os dados atualizados
+  if(typeof showPage==='function' && currentPage) showPage(currentPage);
+}
+
+// Sincroniza automaticamente a cada 20 segundos se houver URL configurada
+let syncInterval=null;
+function iniciarSyncAutomatico(){
+  if(syncInterval) clearInterval(syncInterval);
+  if(!getGsUrl()) return;
+  sincronizarAgora(false); // sync imediato ao iniciar
+  syncInterval=setInterval(()=>sincronizarAgora(false),20000);
+}
+function pararSyncAutomatico(){
+  if(syncInterval){ clearInterval(syncInterval); syncInterval=null; }
 }
 
 // ============================================================
